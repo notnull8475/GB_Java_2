@@ -2,6 +2,8 @@ package ru.geekbrains.lesson1;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 public class MainCircles extends JFrame {
     private static final int POS_X = 400;
@@ -41,6 +43,43 @@ public class MainCircles extends JFrame {
 
         GameCanvas canvas = new GameCanvas(this);
         add(canvas);
+
+        canvas.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton()==1){
+                    Ball[] newBalls = new Ball[balls.length+1];
+                    System.arraycopy(balls, 0, newBalls, 0, balls.length);
+                    newBalls[balls.length] = new Ball();
+                    balls = newBalls;
+                } else if (e.getButton()==3){
+                    Ball[] newBalls = new Ball[balls.length-1];
+                    System.arraycopy(balls, 1, newBalls, 0, newBalls.length);
+                    balls = newBalls;
+                }
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
+
         initApplication();
 
         setVisible(true);
