@@ -23,7 +23,7 @@ public class MainCircles extends JFrame {
     }
 
     void onDrawCanvas(GameCanvas c, Graphics g, float deltaTime){
-//        Background.changeColor(c);
+        Background.changeColor(c);
         update(c,deltaTime);
         render(c,g);
     }
