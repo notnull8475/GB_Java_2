@@ -4,13 +4,13 @@ import java.awt.*;
 
 public class Background {
 
-    static float changeSpeed = 0.001f;
+    static float changeSpeed = 0.1f;
     static float startHue = 0;
     static Color color;
 
-    static void changeColor(GameCanvas c) {
+    static void changeColor(GameCanvas c,float time) {
 
-        startHue += changeSpeed;
+        startHue += time*changeSpeed;
         if (startHue>=1){
             startHue = 0;
         }

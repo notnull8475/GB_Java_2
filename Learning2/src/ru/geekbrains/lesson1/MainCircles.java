@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.sql.Array;
 
 public class MainCircles extends JFrame {
     private static final int POS_X = 400;
@@ -25,7 +26,7 @@ public class MainCircles extends JFrame {
     }
 
     void onDrawCanvas(GameCanvas c, Graphics g, float deltaTime){
-        Background.changeColor(c);
+        Background.changeColor(c,deltaTime);
         update(c,deltaTime);
         render(c,g);
     }
