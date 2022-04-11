@@ -1,15 +1,18 @@
-package ru.geekbrains.lesson1;
+package ru.geekbrains.lesson2.games.circles;
+
+import ru.geekbrains.lesson2.games.common.CommonObject;
+import ru.geekbrains.lesson2.games.common.GameCanvas;
 
 import java.awt.*;
 
-public class Background extends Sprite {
+public class Background implements CommonObject {
 
     float changeSpeed = 0.1f;
     float startHue = 0;
     Color color;
 
     @Override
-    void update(GameCanvas canvas, float deltaTime) {
+    public void update(GameCanvas canvas, float deltaTime) {
         startHue += deltaTime*changeSpeed;
         if (startHue>=1){
             startHue = 0;
@@ -18,7 +21,7 @@ public class Background extends Sprite {
 //        canvas.setBackground(color);
     }
     @Override
-    void render(GameCanvas c, Graphics g){
+    public void render(GameCanvas c, Graphics g){
         c.setBackground(color);
     }
 }

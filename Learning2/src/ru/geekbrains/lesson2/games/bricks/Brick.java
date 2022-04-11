@@ -1,31 +1,34 @@
-package ru.geekbrains.lesson1;
+package ru.geekbrains.lesson2.games.bricks;
+
+import ru.geekbrains.lesson2.games.common.CommonObject;
+import ru.geekbrains.lesson2.games.common.GameCanvas;
+import ru.geekbrains.lesson2.games.common.Sprite;
 
 import java.awt.*;
 import java.util.Random;
 
-public class Ball extends Sprite {
+public class Brick extends Sprite implements CommonObject {
     private static Random rnd = new Random();
     private final Color color;
     private float vX;
     private float vY;
 
-    Ball() {
-        float vx = 100f + (float) (Math.random() * 200f);
-        float vy = 100f + (float) (Math.random() * 200f);
-        color = new Color(rnd.nextInt());
-        new Ball(vx,vy);
-    }
-
-    Ball(float x,float y){
+    Brick() {
         halfHeight = 20 + (float) (Math.random() * 50f);
         halfWidth = halfHeight;
+        vX = 100f + (float) (Math.random() * 200f);
+        vY = 100f + (float) (Math.random() * 200f);
         color = new Color(rnd.nextInt());
-        vX=x;
-        vY=y;
+    }
+
+    Brick(float x, float y){
+        this();
+        this.x = x;
+        this.y = y;
     }
 
     @Override
-    void update(GameCanvas canvas, float deltaTime) {
+    public void update(GameCanvas canvas, float deltaTime) {
         x += vX * deltaTime;
         y += vY * deltaTime;
 
@@ -48,9 +51,9 @@ public class Ball extends Sprite {
     }
 
     @Override
-    void render(GameCanvas canvas, Graphics g) {
+    public void render(GameCanvas canvas, Graphics g) {
         g.setColor(color);
-        g.fillOval((int) getLeft(), (int) getTop(),
+        g.drawRect((int) getLeft(), (int) getTop(),
                 (int) getWidth(), (int) getHeight());
     }
 }

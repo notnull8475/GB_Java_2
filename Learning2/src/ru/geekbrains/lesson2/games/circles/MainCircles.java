@@ -1,33 +1,37 @@
-package ru.geekbrains.lesson1;
+package ru.geekbrains.lesson2.games.circles;
+
+import ru.geekbrains.lesson2.games.common.CommonObject;
+import ru.geekbrains.lesson2.games.common.ControllerInterface;
+import ru.geekbrains.lesson2.games.common.GameCanvas;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class MainCircles extends JFrame {
+public class MainCircles extends JFrame implements ControllerInterface {
     private static final int POS_X = 400;
     private static final int POS_Y = 200;
     private static final int WINDOW_WIDTH = 800;
     private static final int WINDOW_HEIGHT = 600;
 
-    Ball[] balls = new Ball[10];
-    private Sprite[] sprites = new Sprite[1];
-    private int sprintCount;
+    private CommonObject[] commonObjects = new CommonObject[1];
+    private int objectsCount;
 
     private void update(GameCanvas c, float deltaTime) {
-        for (int i = 0; i < sprintCount; i++) {
-            sprites[i].update(c, deltaTime);
+        for (int i = 0; i < objectsCount; i++) {
+            commonObjects[i].update(c, deltaTime);
         }
     }
 
     private void render(GameCanvas c, Graphics g) {
-        for (int i = 0; i < balls.length; i++) {
-            sprites[i].render(c, g);
+        for (int i = 0; i < objectsCount; i++) {
+            commonObjects[i].render(c, g);
         }
     }
 
-    void onDrawCanvas(GameCanvas c, Graphics g, float deltaTime) {
+    @Override
+    public void onDrawCanvas(GameCanvas c, Graphics g, float deltaTime) {
         update(c, deltaTime);
         render(c, g);
     }
@@ -36,19 +40,19 @@ public class MainCircles extends JFrame {
         addSprite(new Background());
     }
 
-    private void addSprite(Sprite s) {
-        if (sprintCount == sprites.length) {
-            Sprite[] temp = new Sprite[sprintCount * 2];
-            System.arraycopy(sprites, 0, temp, 0, sprites.length);
-            sprites = temp;
+    private void addSprite(CommonObject s) {
+        if (objectsCount == commonObjects.length) {
+            CommonObject[] temp = new CommonObject[objectsCount * 2];
+            System.arraycopy(commonObjects, 0, temp, 0, commonObjects.length);
+            commonObjects = temp;
         }
-        sprites[sprintCount++] = s;
+        commonObjects[objectsCount++] = s;
     }
 
     private void removeSprite() {
-       if (sprintCount > 1){
-           sprintCount --;
-       }
+        if (objectsCount > 1) {
+            objectsCount--;
+        }
     }
 
     private MainCircles() {
