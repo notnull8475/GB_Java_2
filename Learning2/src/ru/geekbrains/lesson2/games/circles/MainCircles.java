@@ -9,7 +9,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-public class MainCircles extends JFrame implements ControllerInterface {
+public class MainCircles extends JFrame implements ControllerInterface, MouseListener {
     private static final int POS_X = 400;
     private static final int POS_Y = 200;
     private static final int WINDOW_WIDTH = 800;
@@ -62,22 +62,7 @@ public class MainCircles extends JFrame implements ControllerInterface {
         GameCanvas canvas = new GameCanvas(this);
         add(canvas);
 
-        canvas.addMouseListener(new MouseListener() {
-            @Override public void mouseClicked(MouseEvent e) { }
-            @Override public void mousePressed(MouseEvent e) { }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    addSprite(new Ball(e.getX(), e.getY()));
-                } else if (e.getButton() == MouseEvent.BUTTON3) {
-                    removeSprite();
-                }
-            }
-
-            @Override public void mouseEntered(MouseEvent e) {}
-            @Override public void mouseExited(MouseEvent e) {}
-        });
+        canvas.addMouseListener(this);
 
 
         initApplication();
@@ -87,5 +72,34 @@ public class MainCircles extends JFrame implements ControllerInterface {
 
     public static void main(String[] args) {
         new MainCircles();
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        if (e.getButton() == MouseEvent.BUTTON1) {
+            addSprite(new Ball(e.getX(), e.getY()));
+        } else if (e.getButton() == MouseEvent.BUTTON3) {
+            removeSprite();
+        }
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
     }
 }
