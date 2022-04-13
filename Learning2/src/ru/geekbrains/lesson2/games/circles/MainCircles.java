@@ -6,8 +6,8 @@ import ru.geekbrains.lesson2.games.common.GameCanvas;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 public class MainCircles extends JFrame implements ControllerInterface {
     private static final int POS_X = 400;
@@ -62,7 +62,10 @@ public class MainCircles extends JFrame implements ControllerInterface {
         GameCanvas canvas = new GameCanvas(this);
         add(canvas);
 
-        canvas.addMouseListener(new MouseAdapter() {
+        canvas.addMouseListener(new MouseListener() {
+            @Override public void mouseClicked(MouseEvent e) { }
+            @Override public void mousePressed(MouseEvent e) { }
+
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
@@ -71,6 +74,9 @@ public class MainCircles extends JFrame implements ControllerInterface {
                     removeSprite();
                 }
             }
+
+            @Override public void mouseEntered(MouseEvent e) {}
+            @Override public void mouseExited(MouseEvent e) {}
         });
 
 
