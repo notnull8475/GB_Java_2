@@ -1,5 +1,6 @@
 package ru.geekbrains.lesson3.homework.task2;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
@@ -56,5 +57,14 @@ public class Main {
         for (String s:phones) {
             System.out.println(s);
         }
+
+        PhoneListNew phoneListNew  = new PhoneListNew();
+        phoneListNew.add(stringToArray(template));
+        ArrayList<String> res = phoneListNew.getPhone("Иванов");
+        System.out.println("Иванов" + res);
     }
+
+
+
+
 }
