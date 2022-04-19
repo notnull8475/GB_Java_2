@@ -46,8 +46,8 @@ public class ServerGUI extends JFrame implements ActionListener, Thread.Uncaught
         Object src = e.getSource();
         if (src == btnStart) {
             server.start(80);
-//        } else if (src == btnStop) {
-//            server.stop();
+        } else if (src == btnStop) {
+            server.stop();
         } else {
             throw new RuntimeException("Action for component unimplemented");
         }
