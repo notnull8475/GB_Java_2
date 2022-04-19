@@ -2,10 +2,15 @@ package ru.geekbrains.lesson4;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.EventListener;
 
-public class Client extends JFrame implements ActionListener, Thread.UncaughtExceptionHandler {
+public class Client extends JFrame implements ActionListener, KeyListener, Thread.UncaughtExceptionHandler {
     private static final int WIDTH = 400;
     private static final int HEIGHT = 300;
 
@@ -25,6 +30,7 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
     private final JButton btnSend = new JButton("Send");
     private final JList<String> userList = new JList<>();
 
+    private final String logFilePath = "log_file";
 
     private Client() {
         Thread.setDefaultUncaughtExceptionHandler(this);
@@ -38,10 +44,14 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
         String[] users = {"user1", "user2",
                 "user3", "user4", "user5", "user6",
                 "user7", "user8", "user9",
-                "user10_with_a_exceptionally_long_nickname", };
+                "user10_with_a_exceptionally_long_nickname",};
         userList.setListData(users);
         spUsers.setPreferredSize(new Dimension(100, 0));
         cbAlwaysOnTop.addActionListener(this);
+
+        btnSend.addActionListener(this);
+        tfMessage.addKeyListener(this);
+        readLogFile();
 
         panelTop.add(tfIPAddress);
         panelTop.add(tfPort);
@@ -75,6 +85,8 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
         Object src = e.getSource();
         if (src == cbAlwaysOnTop) {
             setAlwaysOnTop(cbAlwaysOnTop.isSelected());
+        } else if (src == btnSend) {
+            sendMessage();
         } else {
             throw new RuntimeException("Action for component unimplemented");
         }
@@ -90,4 +102,65 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
         JOptionPane.showMessageDialog(null, msg,
                 "Exception", JOptionPane.ERROR_MESSAGE);
     }
+
+    //    Отправка сообщений в лог
+    private void sendMessage() {
+        String message = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime()) +" username:\n    "+ tfMessage.getText() + "\n";
+        tfMessage.setText("");
+        log.append(message + "\n");
+        writeToFile(message);
+    }
+
+
+    /* начало обработка нажатий клавиш */
+    @Override
+    public void keyTyped(KeyEvent e) {}
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        Object src = e.getSource();
+        if (src == tfMessage) {
+            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                sendMessage();
+            }
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {}
+    /*Конец обработка нажатий клавиш*/
+
+
+    /*При инициализации проверяет существование лог-файла, при существовании считывает все в лог,
+    * при отсутствии выдает информационное окно. Новый файл будет создан при отправке сообщения.
+    * выбор пути файла не реализован, используется путь по умолчанию.*/
+
+    private void readLogFile(){
+        try (FileInputStream f = new FileInputStream(logFilePath)) {
+            InputStreamReader isr = new InputStreamReader(f);
+            BufferedReader bf = new BufferedReader(isr);
+            while (true) {
+                String s = bf.readLine();
+                if (s == null || s.equals("")) {
+                    break;
+                }
+                log.append(s + "\n");
+            }
+
+        } catch (IOException e) {
+            String msg = "Файла лога не существует, будет создан новый\n";
+            JOptionPane.showMessageDialog(null,msg,"Warning",JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+
+    private void writeToFile(String msg){
+        try(FileOutputStream f = new FileOutputStream(logFilePath,true)) {
+            byte[] buffer = msg.getBytes(StandardCharsets.UTF_8);
+            f.write(buffer, 0, buffer.length);
+        } catch (IOException e) {
+            throw new RuntimeException("Ошибка записи в файл лога");
+        }
+    }
+
 }
