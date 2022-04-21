@@ -1,8 +1,9 @@
-package ru.geekbrains.lesson4;
+package ru.geekbrains.lesson5.online.chat;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
@@ -146,4 +147,5 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
             throw new RuntimeException("Ошибка записи в файл лога");
         }
     }
+
 }
