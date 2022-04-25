@@ -1,4 +1,4 @@
-package ru.geekbrains.lesson4;
+package ru.geekbrains.jt.client;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,6 +35,7 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
         setSize(WIDTH, HEIGHT);
         setTitle("Chat Client");
         log.setEditable(false);
+
         JScrollPane spLog = new JScrollPane(log);
         JScrollPane spUsers = new JScrollPane(userList);
         String[] users = {"user1", "user2",

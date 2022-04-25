@@ -1,4 +1,4 @@
-package ru.geekbrains.lesson4;
+package ru.geekbrains.jt.core;
 
 public class ChatServer {
     public void start(int port) {
