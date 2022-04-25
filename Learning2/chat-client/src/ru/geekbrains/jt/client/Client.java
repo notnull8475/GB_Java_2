@@ -2,7 +2,8 @@ package ru.geekbrains.jt.client;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
@@ -35,7 +36,6 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
         setSize(WIDTH, HEIGHT);
         setTitle("Chat Client");
         log.setEditable(false);
-
         JScrollPane spLog = new JScrollPane(log);
         JScrollPane spUsers = new JScrollPane(userList);
         String[] users = {"user1", "user2",
@@ -147,4 +147,5 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
             throw new RuntimeException("Ошибка записи в файл лога");
         }
     }
+
 }
