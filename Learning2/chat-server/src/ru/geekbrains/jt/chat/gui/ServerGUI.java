@@ -1,4 +1,6 @@
-package ru.geekbrains.jt.gui;
+package ru.geekbrains.jt.chat.gui;
+
+import ru.geekbrains.jt.chat.core.ChatServer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -45,7 +47,7 @@ public class ServerGUI extends JFrame implements ActionListener, Thread.Uncaught
     public void actionPerformed(ActionEvent e) {
         Object src = e.getSource();
         if (src == btnStart) {
-            server.start(80);
+            server.start(8189);
         } else if (src == btnStop) {
             server.stop();
         } else {
