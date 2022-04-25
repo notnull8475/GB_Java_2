@@ -39,6 +39,7 @@ public class Client extends JFrame implements ActionListener, KeyListener, Threa
         setSize(WIDTH, HEIGHT);
         setTitle("Chat Client");
         log.setEditable(false);
+
         JScrollPane spLog = new JScrollPane(log);
         JScrollPane spUsers = new JScrollPane(userList);
         String[] users = {"user1", "user2",

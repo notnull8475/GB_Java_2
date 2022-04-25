@@ -21,12 +21,13 @@ public class WorkWithArrays {
 
     static void reCalcArray(float[] arr) throws InterruptedException {
 
-        long t = System.currentTimeMillis();
+        long t = System.nanoTime();
         float[] arr1 = new float[h];
         float[] arr2 = new float[h];
         System.arraycopy(arr, 0, arr1, 0, h);
         System.arraycopy(arr, h, arr2, 0, h);
-        System.out.printf("Время деления:  %d\n", System.currentTimeMillis() - t);
+        long delta = (System.nanoTime() - t);
+        System.out.printf("Время деления:  %f\n", delta*1e-9f);
 
         ArrayThread thread1 = new ArrayThread(arr1);
         ArrayThread thread2 = new ArrayThread(arr2);
@@ -36,10 +37,11 @@ public class WorkWithArrays {
         thread1.join();
         thread2.join();
 
-        t = System.currentTimeMillis();
+        t = System.nanoTime();
         System.arraycopy(arr1, 0, arr, 0, h);
         System.arraycopy(arr2, 0, arr, h, h);
-        System.out.printf("Время склейки: %d\n", System.currentTimeMillis() - t);
+        delta = (System.nanoTime() - t);
+        System.out.printf("Время склейки: %f\n", delta*1e-9f);
 
     }
 
@@ -52,22 +54,32 @@ public class WorkWithArrays {
 
         @Override
         public void run() {
-            long t = System.currentTimeMillis();
+            long t = System.nanoTime();
             calcArray(arr);
-            System.out.printf("Время расчета в потоке %s: %d\n", Thread.currentThread().getName(), System.currentTimeMillis() - t);
+            long delta = (System.nanoTime() - t);
+            System.out.printf("Время расчета в потоке %s: %f\n", Thread.currentThread().getName(), delta*1e-9f);
         }
     }
 
     public static void main(String[] args) {
         float[] arr = new float[size];
+        float[] arr1 = new float[size];
         fillArray(arr);
-        long t = System.currentTimeMillis();
+        fillArray(arr1);
+        long t = System.nanoTime();
         calcArray(arr);
-        System.out.printf("Время расчета элементов массива: %d\n", System.currentTimeMillis() - t);
+        long delta = (System.nanoTime() - t);
+        System.out.printf("Время расчета элементов массива: %f\n", delta*1e-9f);
         try {
-            reCalcArray(arr);
+            reCalcArray(arr1);
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+
+        if (arr.equals(arr1)){
+            System.out.println("is equal" );
+        } else {
+            System.out.println("not equal");
         }
     }
 }
