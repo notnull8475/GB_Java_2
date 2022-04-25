@@ -1,4 +1,4 @@
-package ru.geekbrains.lesson4;
+package ru.geekbrains.jt.client;
 
 import javax.swing.*;
 import java.awt.*;
@@ -7,8 +7,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.EventListener;
 
 public class Client extends JFrame implements ActionListener, KeyListener, Thread.UncaughtExceptionHandler {
     private static final int WIDTH = 400;
