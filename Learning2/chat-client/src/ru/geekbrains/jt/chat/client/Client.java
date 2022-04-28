@@ -1,5 +1,6 @@
 package ru.geekbrains.jt.chat.client;
 
+import ru.geekbrains.jt.common.Messages;
 import ru.geekbrains.jt.network.SocketThread;
 import ru.geekbrains.jt.network.SocketThreadListener;
 
@@ -47,13 +48,14 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
         String[] users = {"user1", "user2",
                 "user3", "user4", "user5", "user6",
                 "user7", "user8", "user9",
-                "user10_with_a_exceptionally_long_nickname", };
+                "user10_with_a_exceptionally_long_nickname",};
         userList.setListData(users);
         spUsers.setPreferredSize(new Dimension(100, 0));
         cbAlwaysOnTop.addActionListener(this);
         btnSend.addActionListener(this);
         tfMessage.addActionListener(this);
         btnLogin.addActionListener(this);
+        btnDisconnect.addActionListener(this);
 
         panelTop.add(tfIPAddress);
         panelTop.add(tfPort);
@@ -92,10 +94,9 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
             sendMessage();
         } else if (src == btnLogin) {
             connect();
-        } else if (src == btnDisconnect){
-            panelTop.setVisible(true);
-            panelBottom.setVisible(false);
-        }else {
+        } else if (src == btnDisconnect) {
+            socketThread.close();
+        } else {
             throw new RuntimeException("Action for component unimplemented");
         }
     }
@@ -104,12 +105,11 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
         try {
             Socket socket = new Socket(tfIPAddress.getText(), Integer.parseInt(tfPort.getText()));
             socketThread = new SocketThread(this, "Client", socket);
-            panelBottom.setVisible(true);
-            panelTop.setVisible(false);
         } catch (IOException e) {
             showException(Thread.currentThread(), e);
         }
     }
+
     private void sendMessage() {
         String msg = tfMessage.getText();
         String username = tfLogin.getText();
@@ -172,12 +172,17 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
 
     @Override
     public void onSocketStop(SocketThread t) {
-        putLog("Stop");
+        panelBottom.setVisible(false);
+        panelTop.setVisible(true);
     }
 
     @Override
     public void onSocketReady(SocketThread t, Socket socket) {
-        putLog("Ready");
+        panelBottom.setVisible(true);
+        panelTop.setVisible(false);
+        String login = tfLogin.getText();
+        String pass = new String(tfPassword.getPassword());
+        t.sendMessage(Messages.getAuthRequest(login,pass));
     }
 
     @Override

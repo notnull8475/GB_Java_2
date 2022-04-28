@@ -1,5 +1,6 @@
 package ru.geekbrains.jt.chat.core;
 
+import ru.geekbrains.jt.common.Messages;
 import ru.geekbrains.jt.network.ServerSocketThread;
 import ru.geekbrains.jt.network.ServerSocketThreadListener;
 import ru.geekbrains.jt.network.SocketThread;
@@ -18,10 +19,15 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
 
     int counter = 0;
     ServerSocketThread server;
+    ChatServerListener listener;
+
+    public ChatServer(ChatServerListener listener){
+        this.listener = listener;
+    }
 
     public void start(int port) {
         if (server != null && server.isAlive()) {
-            System.out.println("Server already started");
+            putLog("Server already started");
         } else {
             server = new ServerSocketThread(this, "Chat server " + counter++, port, SERVER_SOCKET_TIMEOUT);
         }
@@ -29,7 +35,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
 
     public void stop() {
         if (server == null || !server.isAlive()) {
-            System.out.println("Server is not running");
+            putLog("Server is not running");
         } else {
             server.interrupt();
         }
@@ -39,7 +45,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         msg = DATE_FORMAT.format(System.currentTimeMillis()) +
                 Thread.currentThread().getName() +
                 ": " + msg;
-        System.out.println(msg);
+        listener.onChatServerMessage(msg);
     }
 
     /**
@@ -49,6 +55,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     @Override
     public void onServerStart(ServerSocketThread thread) {
         putLog("Server thread started");
+        DBClient.connect();
     }
 
     @Override
@@ -70,7 +77,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     public void onSocketAccepted(ServerSocketThread t, ServerSocket s, Socket client) {
         putLog("client connected");
         String name = "SocketThread" + client.getInetAddress() + ": " + client.getPort();
-        clients.add(new SocketThread(this, name, client));
+        new ClientThread(this, name, client);
     }
 
     @Override
@@ -86,16 +93,23 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     @Override
     public void onSocketStop(SocketThread t) {
         putLog("client disconnected");
+        clients.remove(t);
     }
 
     @Override
     public void onSocketReady(SocketThread t, Socket socket) {
         putLog("client is ready");
+        clients.add(t);
     }
 
     @Override
     public void onReceiveString(SocketThread t, Socket s, String msg) {
-        t.sendMessage("echo: " + msg);
+        ClientThread client = (ClientThread) t;
+        if (client.isAuthorized()){
+            sendMessageToAll(msg);
+        } else {
+            handleNonAuthMsg(client,msg);
+        }
     }
 
     @Override
@@ -103,7 +117,24 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         e.printStackTrace();
     }
 
-    public void sendMessageToAll(String msg){
+    private void sendMessageToAll(String msg){
         clients.forEach(socketThread -> socketThread.sendMessage(msg));
+    }
+
+    private void handleNonAuthMsg(ClientThread client, String msg){
+        String[] arr = msg.split(Messages.DELIMITER);
+        if (arr.length != 3 || !arr[0].endsWith(Messages.AUTH_REQUEST)){
+            client.msgFormatError(msg);
+            return;
+        }
+        String login  = arr[1];
+        String pass = arr[2];
+        String nickname = DBClient.getNick(login,pass);
+        if (nickname == null){
+            putLog("Invalid login attempt " + login);
+            client.authFail();
+            return;
+        }
+        client.authAccept(nickname);
     }
 }
