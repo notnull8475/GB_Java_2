@@ -11,6 +11,8 @@ import java.awt.event.ActionListener;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Vector;
 
 public class Client extends JFrame implements ActionListener, Thread.UncaughtExceptionHandler, SocketThreadListener {
     private static final int WIDTH = 600;
@@ -36,6 +38,7 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
     private SocketThread socketThread;
 
     private String nick;
+    private Vector<String> users = new Vector<>();
 
     private Client() {
         Thread.setDefaultUncaughtExceptionHandler(this);
@@ -47,10 +50,6 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
         log.setLineWrap(true);
         JScrollPane spLog = new JScrollPane(log);
         JScrollPane spUsers = new JScrollPane(userList);
-        String[] users = {"user1", "user2",
-                "user3", "user4", "user5", "user6",
-                "user7", "user8", "user9",
-                "user10_with_a_exceptionally_long_nickname",};
         userList.setListData(users);
         spUsers.setPreferredSize(new Dimension(100, 0));
         cbAlwaysOnTop.addActionListener(this);
@@ -198,9 +197,20 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
             putLog("Auth deny");
         } else if (m[0].equals(Messages.MSG_BROADCAST)) {
             putLog(m[2] + " to all: " + m[3]);
+            if (m[2].equals("Server")){
+                String[] temp = m[3].split(" ");
+                if (temp[1].equals("connected")){
+                    updateList(temp[0]);
+                }
+            }
         } else {
             putLog(msg);
         }
+    }
+
+    public void updateList(String n){
+        users.add(n);
+        userList.setListData(users);
     }
 
     @Override

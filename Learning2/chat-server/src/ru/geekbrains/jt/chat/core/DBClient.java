@@ -1,6 +1,6 @@
 package ru.geekbrains.jt.chat.core;
 
-import ru.geekbrains.jt.chat.conn.ConnectionUtils;
+import ru.geekbrains.jt.chat.conn.PostgreSQLConnUtil;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -13,7 +13,7 @@ public class DBClient {
 
     synchronized static void connect() {
         try {
-            conn = ConnectionUtils.getConnection();
+            conn = PostgreSQLConnUtil.getMyPostgreSQLConnection();
             st = conn.createStatement();
         } catch (SQLException | ClassNotFoundException e) {
             throw new RuntimeException(e);
@@ -29,7 +29,7 @@ public class DBClient {
     }
 
     synchronized static String getNick(String login, String password){
-        String sql = String.format("select nickname from users where login = '%s and password = '%s'",login,password);
+        String sql = String.format("select nickname from users where login = '%s' and password = '%s'",login,password);
         try(ResultSet rs = st.executeQuery(sql)){
             if (rs.next()){
                 return rs.getString("nickname");
