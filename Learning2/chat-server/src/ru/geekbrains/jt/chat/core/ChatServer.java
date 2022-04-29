@@ -15,7 +15,7 @@ import java.util.Vector;
 public class ChatServer implements ServerSocketThreadListener, SocketThreadListener {
     private final int SERVER_SOCKET_TIMEOUT = 2000;
     private final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss: ");
-    private final Vector<SocketThread> clients = new Vector<>();
+    private Vector<SocketThread> clients = new Vector<>();
 
     int counter = 0;
     ServerSocketThread server;
@@ -61,6 +61,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     @Override
     public void onServerStop(ServerSocketThread thread) {
         putLog("Server thread stopped");
+        DBClient.disconnect();
     }
 
     @Override
@@ -106,7 +107,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     public void onReceiveString(SocketThread t, Socket s, String msg) {
         ClientThread client = (ClientThread) t;
         if (client.isAuthorized()){
-            sendMessageToAll(msg);
+            handleAuthMsg(client,msg);
         } else {
             handleNonAuthMsg(client,msg);
         }
@@ -117,13 +118,21 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         e.printStackTrace();
     }
 
-    private void sendMessageToAll(String msg){
-        clients.forEach(socketThread -> socketThread.sendMessage(msg));
+    private void handleAuthMsg(ClientThread client, String msg) {
+        sendToAllAuthorized(msg);
     }
 
-    private void handleNonAuthMsg(ClientThread client, String msg){
+    private void sendToAllAuthorized(String msg) {
+        for (int i = 0; i < clients.size(); i++) {
+            ClientThread client = (ClientThread) clients.get(i);
+            if (!client.isAuthorized()) continue;
+            client.sendMessage(msg);
+        }
+    }
+
+    private void handleNonAuthMsg(ClientThread client, String msg) {
         String[] arr = msg.split(Messages.DELIMITER);
-        if (arr.length != 3 || !arr[0].endsWith(Messages.AUTH_REQUEST)){
+        if (arr.length != 3 || !arr[0].equals(Messages.AUTH_REQUEST)) {
             client.msgFormatError(msg);
             return;
         }
@@ -136,5 +145,6 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
             return;
         }
         client.authAccept(nickname);
+        sendToAllAuthorized(Messages.getTypeBroadcast("Server", nickname + " connected."));
     }
 }

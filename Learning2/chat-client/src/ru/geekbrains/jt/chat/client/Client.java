@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class Client extends JFrame implements ActionListener, Thread.UncaughtExceptionHandler, SocketThreadListener {
-    private static final int WIDTH = 400;
+    private static final int WIDTH = 600;
     private static final int HEIGHT = 300;
 
     private final JTextArea log = new JTextArea();
@@ -162,7 +162,7 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
     @Override
     public void uncaughtException(Thread t, Throwable e) {
         e.printStackTrace();
-        showException(t, e);
+        //showException(t, e);
     }
 
     @Override

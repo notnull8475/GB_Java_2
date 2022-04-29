@@ -25,15 +25,16 @@ public class ClientThread extends SocketThread {
     void authAccept(String nickname) {
         isAuthorized = true;
         this.nickname = nickname;
-        sendMessage(Messages.getAuthAccept());
+        sendMessage(Messages.getAuthAccept(nickname));
     }
 
     void authFail(){
-        sendMessage(Messages.getAuthDeny());
+        sendMessage(Messages.getAuthDenied());
         close();
     }
 
     void  msgFormatError(String msg) {
         sendMessage(Messages.getMsgFormatError(msg));
+        close();
     }
 }

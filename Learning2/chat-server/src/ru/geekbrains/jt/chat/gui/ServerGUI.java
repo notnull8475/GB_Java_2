@@ -29,7 +29,8 @@ public class ServerGUI extends JFrame implements ActionListener, Thread.Uncaught
         setResizable(false);
         setTitle("Chat server");
         setAlwaysOnTop(true);
-        setLayout(new GridLayout(2, 1));
+        log.setEditable(false);
+        log.setLineWrap(true);
         JScrollPane scrollLog = new JScrollPane(log);
         btnStart.addActionListener(this);
         btnStop.addActionListener(this);
