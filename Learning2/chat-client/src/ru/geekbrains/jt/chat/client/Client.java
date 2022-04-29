@@ -22,8 +22,8 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
     private final JTextField tfIPAddress = new JTextField("127.0.0.1");
     private final JTextField tfPort = new JTextField("8189");
     private final JCheckBox cbAlwaysOnTop = new JCheckBox("Always on top");
-    private final JTextField tfLogin = new JTextField("ivan_igorevich");
-    private final JPasswordField tfPassword = new JPasswordField("123456");
+    private final JTextField tfLogin = new JTextField("test");
+    private final JPasswordField tfPassword = new JPasswordField("test");
     private final JButton btnLogin = new JButton("Login");
 
     private final JPanel panelBottom = new JPanel(new BorderLayout());
@@ -34,6 +34,8 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
 
     private boolean shownIoErrors = false;
     private SocketThread socketThread;
+
+    private String nick;
 
     private Client() {
         Thread.setDefaultUncaughtExceptionHandler(this);
@@ -96,6 +98,7 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
             connect();
         } else if (src == btnDisconnect) {
             socketThread.close();
+            putLog("Подключение разорвано");
         } else {
             throw new RuntimeException("Action for component unimplemented");
         }
@@ -112,11 +115,12 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
 
     private void sendMessage() {
         String msg = tfMessage.getText();
-        String username = tfLogin.getText();
         if ("".equals(msg)) return;
         tfMessage.setText(null);
         tfMessage.grabFocus();
-        socketThread.sendMessage(msg);
+
+//        Отправка всем по умолчанию
+        socketThread.sendMessage(Messages.getTypeBroadcast(nick,msg));
 //        tfMessage.requestFocusInWindow();
 //        putLog(String.format("%s: %s", username, msg));
         //wrtMsgToLogFile(msg, username);
@@ -167,7 +171,7 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
 
     @Override
     public void onSocketStart(SocketThread t, Socket s) {
-        putLog("Start");
+//        putLog("Start");
     }
 
     @Override
@@ -182,12 +186,21 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
         panelTop.setVisible(false);
         String login = tfLogin.getText();
         String pass = new String(tfPassword.getPassword());
-        t.sendMessage(Messages.getAuthRequest(login,pass));
+        t.sendMessage(Messages.getAuthRequest(login, pass));
     }
 
     @Override
     public void onReceiveString(SocketThread t, Socket s, String msg) {
-        putLog(msg);
+        String[] m = msg.split(Messages.DELIMITER);
+        if (m[0].equals(Messages.AUTH_ACCEPT)) {
+            nick = m[1];
+        } else if (m[0].equals(Messages.AUTH_DENY)) {
+            putLog("Auth deny");
+        } else if (m[0].equals(Messages.MSG_BROADCAST)) {
+            putLog(m[2] + " to all: " + m[3]);
+        } else {
+            putLog(msg);
+        }
     }
 
     @Override

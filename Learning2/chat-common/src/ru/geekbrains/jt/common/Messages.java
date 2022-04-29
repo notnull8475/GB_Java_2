@@ -19,6 +19,7 @@ public class Messages {
     public static String getAuthDenied() {
         return AUTH_DENY;
     }
+
     public static String getMsgFormatError(String message) {
         return MSG_FORMAT_ERROR + DELIMITER + message;
     }
