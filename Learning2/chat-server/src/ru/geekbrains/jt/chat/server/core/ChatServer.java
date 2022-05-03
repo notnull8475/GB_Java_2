@@ -50,7 +50,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
 
     /**
      * Server socket thread methods
-     * */
+     */
 
     @Override
     public void onServerStart(ServerSocketThread thread) {
@@ -91,7 +91,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
 
     /**
      * Socket Thread listening
-     * */
+     */
 
     @Override
     public synchronized void onSocketStart(SocketThread t, Socket s) {
@@ -160,7 +160,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         } else {
             ClientThread oldClient = findClientByNickname(nickname);
             client.authAccept(nickname);
-            if (oldClient == null){
+            if (oldClient == null) {
                 sendToAllAuthorized(Messages.getTypeBroadcast("Server", nickname + " connected."));
             } else {
                 oldClient.reconnect();
