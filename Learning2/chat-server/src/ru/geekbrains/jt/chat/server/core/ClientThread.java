@@ -11,8 +11,11 @@ public class ClientThread extends SocketThread {
     private boolean isAuthorized;
     private boolean isReconnecting;
 
+    private long connectTime;
+
     public ClientThread(SocketThreadListener listener, String name, Socket socket) {
         super(listener, name, socket);
+        connectTime = System.currentTimeMillis();
     }
 
     public boolean isReconnecting() {
@@ -46,5 +49,9 @@ public class ClientThread extends SocketThread {
     void msgFormatError(String msg) {
         sendMessage(Messages.getMsgFormatError(msg));
         close();
+    }
+
+    public long getConnectTime() {
+        return connectTime;
     }
 }

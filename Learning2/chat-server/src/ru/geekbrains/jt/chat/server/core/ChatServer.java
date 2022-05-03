@@ -17,6 +17,8 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     private final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss: ");
     private Vector<SocketThread> clients = new Vector<>();
 
+    private long timeout = 120_000;
+
     int counter = 0;
     ServerSocketThread server;
     ChatServerListener listener;
@@ -120,6 +122,9 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         if (client.isAuthorized()) {
             handleAuthMsg(client, msg);
         } else {
+            if (System.currentTimeMillis() > client.getConnectTime() + timeout){
+                client.close();
+            }
             handleNonAuthMsg(client, msg);
         }
     }
