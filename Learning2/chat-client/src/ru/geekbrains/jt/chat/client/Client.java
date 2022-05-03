@@ -11,19 +11,23 @@ import java.awt.event.ActionListener;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.Socket;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
 
 public class Client extends JFrame implements ActionListener, Thread.UncaughtExceptionHandler, SocketThreadListener {
     private static final int WIDTH = 600;
     private static final int HEIGHT = 300;
-
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss: ");
+    private static final String TITLE = "Chat Client";
     private final JTextArea log = new JTextArea();
 
     private final JPanel panelTop = new JPanel(new GridLayout(2, 3));
     private final JTextField tfIPAddress = new JTextField("127.0.0.1");
     private final JTextField tfPort = new JTextField("8189");
     private final JCheckBox cbAlwaysOnTop = new JCheckBox("Always on top");
-    private final JTextField tfLogin = new JTextField("ivan_igorevich");
-    private final JPasswordField tfPassword = new JPasswordField("123456");
+    private final JTextField tfLogin = new JTextField("ivan-igorevich");
+    private final JPasswordField tfPassword = new JPasswordField("123");
     private final JButton btnLogin = new JButton("Login");
 
     private final JPanel panelBottom = new JPanel(new BorderLayout());
@@ -35,21 +39,17 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
     private boolean shownIoErrors = false;
     private SocketThread socketThread;
 
+
     private Client() {
         Thread.setDefaultUncaughtExceptionHandler(this);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null); //посреди экрана
         setSize(WIDTH, HEIGHT);
-        setTitle("Chat Client");
+        setTitle(TITLE);
         log.setEditable(false);
         log.setLineWrap(true);
         JScrollPane spLog = new JScrollPane(log);
         JScrollPane spUsers = new JScrollPane(userList);
-        String[] users = {"user1", "user2",
-                "user3", "user4", "user5", "user6",
-                "user7", "user8", "user9",
-                "user10_with_a_exceptionally_long_nickname", };
-        userList.setListData(users);
         spUsers.setPreferredSize(new Dimension(100, 0));
         cbAlwaysOnTop.addActionListener(this);
         btnSend.addActionListener(this);
@@ -115,7 +115,7 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
         if ("".equals(msg)) return;
         tfMessage.setText(null);
         tfMessage.grabFocus();
-        socketThread.sendMessage(msg);
+        socketThread.sendMessage(Messages.getTypeBcastFromClient(msg));
 //        tfMessage.requestFocusInWindow();
 //        putLog(String.format("%s: %s", username, msg));
         //wrtMsgToLogFile(msg, username);
@@ -174,6 +174,8 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
     public void onSocketStop(SocketThread t) {
         panelBottom.setVisible(false);
         panelTop.setVisible(true);
+        setTitle(TITLE);
+        userList.setListData(new String[0]);
     }
 
     @Override
@@ -187,7 +189,37 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
 
     @Override
     public void onReceiveString(SocketThread t, Socket s, String msg) {
-        putLog(msg);
+        handleMessage(msg);
+    }
+
+    void handleMessage(String value) {
+        String[] arr = value.split(Messages.DELIMITER);
+        String msgType = arr[0];
+        switch (msgType) {
+            case Messages.AUTH_ACCEPT:
+                setTitle(TITLE + " logged in as: " + arr[1]);
+                break;
+            case Messages.AUTH_DENY:
+                putLog(value);
+                break;
+            case Messages.MSG_FORMAT_ERROR:
+                putLog(value);
+                socketThread.close();
+                break;
+            case Messages.USER_LIST:
+                String users = value.substring(Messages.DELIMITER.length() +
+                        Messages.USER_LIST.length());
+                String[] usersArr = users.split(Messages.DELIMITER);
+                Arrays.sort(usersArr);
+                userList.setListData(usersArr);
+                break;
+            case Messages.MSG_BROADCAST:
+                log.append(DATE_FORMAT.format(Long.parseLong(arr[1])) + ": " + arr[2] + ": " + arr[3] + "\n");
+                log.setCaretPosition(log.getDocument().getLength());
+                break;
+            default:
+                throw new RuntimeException("Unknown message type: " + msgType);
+        }
     }
 
     @Override
