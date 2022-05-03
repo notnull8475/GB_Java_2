@@ -9,7 +9,6 @@ public class SocketThread extends Thread {
     private final SocketThreadListener listener;
     private final Socket socket;
     private DataOutputStream out;
-    private boolean isError = true;
 
     public SocketThread(SocketThreadListener listener, String name, Socket socket) {
         super(name);
@@ -30,16 +29,12 @@ public class SocketThread extends Thread {
                 listener.onReceiveString(this, socket, msg);
             }
         } catch (IOException e) {
-            if (isError) {
-                listener.onSocketException(this, e);
-            }
+            listener.onSocketException(this, e);
         } finally {
             try {
                 socket.close();
             } catch (IOException e) {
-                if (!socket.isClosed()) {
-                    listener.onSocketException(this, e);
-                }
+                listener.onSocketException(this, e);
             }
             listener.onSocketStop(this);
         }
@@ -60,7 +55,6 @@ public class SocketThread extends Thread {
         interrupt();
         try {
             socket.close();
-            isError = false;
         } catch (IOException e) {
             listener.onSocketException(this, e);
         }

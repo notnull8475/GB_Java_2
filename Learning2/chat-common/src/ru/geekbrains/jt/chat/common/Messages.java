@@ -1,4 +1,4 @@
-package ru.geekbrains.jt.common;
+package ru.geekbrains.jt.chat.common;
 
 public class Messages {
     public static final String DELIMITER = "§";
@@ -19,7 +19,6 @@ public class Messages {
     public static String getAuthDenied() {
         return AUTH_DENY;
     }
-
     public static String getMsgFormatError(String message) {
         return MSG_FORMAT_ERROR + DELIMITER + message;
     }

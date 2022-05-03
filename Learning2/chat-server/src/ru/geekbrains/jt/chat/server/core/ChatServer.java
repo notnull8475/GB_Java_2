@@ -1,6 +1,6 @@
-package ru.geekbrains.jt.chat.core;
+package ru.geekbrains.jt.chat.server.core;
 
-import ru.geekbrains.jt.common.Messages;
+import ru.geekbrains.jt.chat.common.Messages;
 import ru.geekbrains.jt.network.ServerSocketThread;
 import ru.geekbrains.jt.network.ServerSocketThreadListener;
 import ru.geekbrains.jt.network.SocketThread;
@@ -21,7 +21,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     ServerSocketThread server;
     ChatServerListener listener;
 
-    public ChatServer(ChatServerListener listener){
+    public ChatServer(ChatServerListener listener) {
         this.listener = listener;
     }
 
@@ -55,13 +55,13 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     @Override
     public void onServerStart(ServerSocketThread thread) {
         putLog("Server thread started");
-        DBClient.connect();
+        SqlClient.connect();
     }
 
     @Override
     public void onServerStop(ServerSocketThread thread) {
         putLog("Server thread stopped");
-        DBClient.disconnect();
+        SqlClient.disconnect();
     }
 
     @Override
@@ -86,6 +86,10 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         e.printStackTrace();
     }
 
+    /**
+     * Socket Thread listening
+     * */
+
     @Override
     public void onSocketStart(SocketThread t, Socket s) {
         putLog("Client connected");
@@ -94,8 +98,6 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     @Override
     public void onSocketStop(SocketThread t) {
         putLog("client disconnected");
-        ClientThread c = (ClientThread) t;
-        sendToAllAuthorized(Messages.getTypeBroadcast(c.getNickname(),"is out"));
         clients.remove(t);
     }
 
@@ -108,16 +110,11 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     @Override
     public void onReceiveString(SocketThread t, Socket s, String msg) {
         ClientThread client = (ClientThread) t;
-        if (client.isAuthorized()){
-            handleAuthMsg(client,msg);
+        if (client.isAuthorized()) {
+            handleAuthMsg(client, msg);
         } else {
-            handleNonAuthMsg(client,msg);
+            handleNonAuthMsg(client, msg);
         }
-    }
-
-    @Override
-    public void onSocketException(SocketThread t, Throwable e) {
-        e.printStackTrace();
     }
 
     private void handleAuthMsg(ClientThread client, String msg) {
@@ -138,15 +135,20 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
             client.msgFormatError(msg);
             return;
         }
-        String login  = arr[1];
-        String pass = arr[2];
-        String nickname = DBClient.getNick(login,pass);
-        if (nickname == null){
+        String login = arr[1];
+        String password = arr[2];
+        String nickname = SqlClient.getNick(login, password);
+        if (nickname == null) {
             putLog("Invalid login attempt " + login);
             client.authFail();
             return;
         }
         client.authAccept(nickname);
         sendToAllAuthorized(Messages.getTypeBroadcast("Server", nickname + " connected."));
+    }
+
+    @Override
+    public void onSocketException(SocketThread t, Throwable e) {
+        e.printStackTrace();
     }
 }

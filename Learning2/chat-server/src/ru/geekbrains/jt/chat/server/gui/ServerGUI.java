@@ -1,28 +1,26 @@
-package ru.geekbrains.jt.chat.gui;
+package ru.geekbrains.jt.chat.server.gui;
 
-import ru.geekbrains.jt.chat.core.ChatServer;
-import ru.geekbrains.jt.chat.core.ChatServerListener;
+import ru.geekbrains.jt.chat.server.core.ChatServer;
+import ru.geekbrains.jt.chat.server.core.ChatServerListener;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-
 public class ServerGUI extends JFrame implements ActionListener, Thread.UncaughtExceptionHandler, ChatServerListener {
-    private static final int POS_X = 100;
-    private static final int POS_Y = 100;
-    private static final int WIDTH = 640;
-    private static final int HEIGHT = 480;
+    private static final int POS_X = 800;
+    private static final int POS_Y = 200;
+    private static final int WIDTH = 600;
+    private static final int HEIGHT = 300;
 
     private final ChatServer server = new ChatServer(this);
     private final JButton btnStart = new JButton("Start");
     private final JButton btnStop = new JButton("Stop");
-    private final JPanel panelTop = new JPanel(new GridLayout(1,2));
+    private final JPanel panelTop = new JPanel(new GridLayout(1, 2));
     private final JTextArea log = new JTextArea();
 
     private ServerGUI() {
-        setDefaultLookAndFeelDecorated(true);
         Thread.setDefaultUncaughtExceptionHandler(this);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setBounds(POS_X, POS_Y, WIDTH, HEIGHT);
@@ -36,20 +34,18 @@ public class ServerGUI extends JFrame implements ActionListener, Thread.Uncaught
         btnStop.addActionListener(this);
         panelTop.add(btnStart);
         panelTop.add(btnStop);
-        add(panelTop,BorderLayout.NORTH);
-        add(scrollLog,BorderLayout.CENTER);
+        add(panelTop, BorderLayout.NORTH);
+        add(scrollLog, BorderLayout.CENTER);
         setVisible(true);
     }
 
     public static void main(String[] args) {
-        System.out.println("main started");
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 new ServerGUI();
             }
         });
-        System.out.println("main ended");
     }
 
     @Override
@@ -77,7 +73,7 @@ public class ServerGUI extends JFrame implements ActionListener, Thread.Uncaught
 
     @Override
     public void onChatServerMessage(String msg) {
-        SwingUtilities.invokeLater(()->{
+        SwingUtilities.invokeLater(() -> {
             log.append(msg + "\n");
             log.setCaretPosition(log.getDocument().getLength());
         });

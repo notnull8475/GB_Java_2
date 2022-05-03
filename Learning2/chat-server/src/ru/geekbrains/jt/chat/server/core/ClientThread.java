@@ -1,6 +1,6 @@
-package ru.geekbrains.jt.chat.core;
+package ru.geekbrains.jt.chat.server.core;
 
-import ru.geekbrains.jt.common.Messages;
+import ru.geekbrains.jt.chat.common.Messages;
 import ru.geekbrains.jt.network.SocketThread;
 import ru.geekbrains.jt.network.SocketThreadListener;
 
@@ -28,12 +28,12 @@ public class ClientThread extends SocketThread {
         sendMessage(Messages.getAuthAccept(nickname));
     }
 
-    void authFail(){
+    void authFail() {
         sendMessage(Messages.getAuthDenied());
         close();
     }
 
-    void  msgFormatError(String msg) {
+    void msgFormatError(String msg) {
         sendMessage(Messages.getMsgFormatError(msg));
         close();
     }

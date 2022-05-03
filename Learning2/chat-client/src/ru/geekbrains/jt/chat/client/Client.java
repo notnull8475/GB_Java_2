@@ -1,6 +1,6 @@
 package ru.geekbrains.jt.chat.client;
 
-import ru.geekbrains.jt.common.Messages;
+import ru.geekbrains.jt.chat.common.Messages;
 import ru.geekbrains.jt.network.SocketThread;
 import ru.geekbrains.jt.network.SocketThreadListener;
 
@@ -11,8 +11,6 @@ import java.awt.event.ActionListener;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Vector;
 
 public class Client extends JFrame implements ActionListener, Thread.UncaughtExceptionHandler, SocketThreadListener {
     private static final int WIDTH = 600;
@@ -24,21 +22,18 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
     private final JTextField tfIPAddress = new JTextField("127.0.0.1");
     private final JTextField tfPort = new JTextField("8189");
     private final JCheckBox cbAlwaysOnTop = new JCheckBox("Always on top");
-    private final JTextField tfLogin = new JTextField("test");
-    private final JPasswordField tfPassword = new JPasswordField("test");
+    private final JTextField tfLogin = new JTextField("ivan_igorevich");
+    private final JPasswordField tfPassword = new JPasswordField("123456");
     private final JButton btnLogin = new JButton("Login");
 
     private final JPanel panelBottom = new JPanel(new BorderLayout());
     private final JButton btnDisconnect = new JButton("Disconnect");
     private final JTextField tfMessage = new JTextField();
-    private final JButton btnSend = new JButton("Send");
+    private final JButton btnSend = new JButton("<html><b>Send</b></html>");
     private final JList<String> userList = new JList<>();
 
     private boolean shownIoErrors = false;
     private SocketThread socketThread;
-
-    private String nick;
-    private Vector<String> users = new Vector<>();
 
     private Client() {
         Thread.setDefaultUncaughtExceptionHandler(this);
@@ -50,6 +45,10 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
         log.setLineWrap(true);
         JScrollPane spLog = new JScrollPane(log);
         JScrollPane spUsers = new JScrollPane(userList);
+        String[] users = {"user1", "user2",
+                "user3", "user4", "user5", "user6",
+                "user7", "user8", "user9",
+                "user10_with_a_exceptionally_long_nickname", };
         userList.setListData(users);
         spUsers.setPreferredSize(new Dimension(100, 0));
         cbAlwaysOnTop.addActionListener(this);
@@ -57,6 +56,7 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
         tfMessage.addActionListener(this);
         btnLogin.addActionListener(this);
         btnDisconnect.addActionListener(this);
+        panelBottom.setVisible(false);
 
         panelTop.add(tfIPAddress);
         panelTop.add(tfPort);
@@ -67,7 +67,6 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
         panelBottom.add(btnDisconnect, BorderLayout.WEST);
         panelBottom.add(tfMessage, BorderLayout.CENTER);
         panelBottom.add(btnSend, BorderLayout.EAST);
-        panelBottom.setVisible(false);
 
         add(panelBottom, BorderLayout.SOUTH);
         add(panelTop, BorderLayout.NORTH);
@@ -97,7 +96,6 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
             connect();
         } else if (src == btnDisconnect) {
             socketThread.close();
-            putLog("Подключение разорвано");
         } else {
             throw new RuntimeException("Action for component unimplemented");
         }
@@ -111,20 +109,19 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
             showException(Thread.currentThread(), e);
         }
     }
-
     private void sendMessage() {
         String msg = tfMessage.getText();
+        String username = tfLogin.getText();
         if ("".equals(msg)) return;
         tfMessage.setText(null);
         tfMessage.grabFocus();
-
-//        Отправка всем по умолчанию
-        socketThread.sendMessage(Messages.getTypeBroadcast(nick,msg));
+        socketThread.sendMessage(msg);
 //        tfMessage.requestFocusInWindow();
 //        putLog(String.format("%s: %s", username, msg));
         //wrtMsgToLogFile(msg, username);
 
     }
+//codewars, hackerrank, leetcode, codegame
 
     private void wrtMsgToLogFile(String msg, String username) {
         try (FileWriter out = new FileWriter("log.txt", true)) {
@@ -170,7 +167,7 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
 
     @Override
     public void onSocketStart(SocketThread t, Socket s) {
-//        putLog("Start");
+        putLog("Start");
     }
 
     @Override
@@ -190,27 +187,7 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
 
     @Override
     public void onReceiveString(SocketThread t, Socket s, String msg) {
-        String[] m = msg.split(Messages.DELIMITER);
-        if (m[0].equals(Messages.AUTH_ACCEPT)) {
-            nick = m[1];
-        } else if (m[0].equals(Messages.AUTH_DENY)) {
-            putLog("Auth deny");
-        } else if (m[0].equals(Messages.MSG_BROADCAST)) {
-            putLog(m[2] + " to all: " + m[3]);
-            if (m[2].equals("Server")){
-                String[] temp = m[3].split(" ");
-                if (temp[1].equals("connected")){
-                    updateList(temp[0]);
-                }
-            }
-        } else {
-            putLog(msg);
-        }
-    }
-
-    public void updateList(String n){
-        users.add(n);
-        userList.setListData(users);
+        putLog(msg);
     }
 
     @Override
