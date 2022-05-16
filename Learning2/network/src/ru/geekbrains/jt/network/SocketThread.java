@@ -20,7 +20,7 @@ public class SocketThread extends Thread {
     @Override
     public void run() {
         try {
-            listener.onSocketStart(this, socket);
+            listener.onSocketStart();
             DataInputStream in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
             listener.onSocketReady(this, socket);

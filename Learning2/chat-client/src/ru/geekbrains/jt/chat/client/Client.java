@@ -46,6 +46,7 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
         setLocationRelativeTo(null); //посреди экрана
         setSize(WIDTH, HEIGHT);
         setTitle(TITLE);
+        setResizable(false);
         log.setEditable(false);
         log.setLineWrap(true);
         JScrollPane spLog = new JScrollPane(log);
@@ -166,7 +167,7 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
     }
 
     @Override
-    public void onSocketStart(SocketThread t, Socket s) {
+    public void onSocketStart() {
         putLog("Start");
     }
 
