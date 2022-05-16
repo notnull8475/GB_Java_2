@@ -17,7 +17,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     private final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss: ");
     private Vector<SocketThread> clients = new Vector<>();
 
-    private long timeout = 120_000;
+    private final long TIMEOUT = 120_000;
 
     int counter = 0;
     ServerSocketThread server;
@@ -96,7 +96,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
      */
 
     @Override
-    public synchronized void onSocketStart(SocketThread t, Socket s) {
+    public synchronized void onSocketStart() {
         putLog("Client connected");
     }
 
@@ -122,7 +122,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         if (client.isAuthorized()) {
             handleAuthMsg(client, msg);
         } else {
-            if (System.currentTimeMillis() > client.getConnectTime() + timeout){
+            if (System.currentTimeMillis() > client.getConnectTime() + TIMEOUT){
                 client.close();
             }
             handleNonAuthMsg(client, msg);
