@@ -21,12 +21,12 @@ public class DBUtils {
         } else return null;
     }
 
-    public synchronized static boolean registerUser(Connection conn, String login, String password, String nick) throws SQLException {
+    public synchronized static int registerUser(Connection conn, String login, String password, String nick) throws SQLException {
         PreparedStatement ps = conn.prepareStatement(REGISTER_USER);
         ps.setString(1, login);
         ps.setString(2, password);
         ps.setString(3, nick);
-        return ps.execute();
+        return ps.executeUpdate();
     }
 
     public synchronized static int updateUserNick(Connection conn, String login, String nick) throws SQLException {

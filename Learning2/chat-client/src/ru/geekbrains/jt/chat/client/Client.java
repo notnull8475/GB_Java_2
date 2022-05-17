@@ -18,6 +18,8 @@ import java.util.Arrays;
 public class Client extends JFrame implements ActionListener, Thread.UncaughtExceptionHandler, SocketThreadListener {
     private static final int WIDTH = 600;
     private static final int HEIGHT = 300;
+    private static final int POS_X = 400;
+    private static final int POS_Y = 200;
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss: ");
     private static final String TITLE = "Chat Client";
     private final JTextArea log = new JTextArea();
@@ -33,7 +35,7 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
     private final JButton btnRegister = new JButton("SignUp");
     private final JButton btnUpdateInfo = new JButton("Edit");
 
-    private final JPanel panelBottom = new JPanel(new GridLayout(1,4));
+    private final JPanel panelBottom = new JPanel(new GridLayout(1, 4));
     private final JButton btnDisconnect = new JButton("Disconnect");
     private final JTextField tfMessage = new JTextField();
     private final JButton btnSend = new JButton("<html><b>Send</b></html>");
@@ -49,7 +51,7 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
         Thread.setDefaultUncaughtExceptionHandler(this);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null); //посреди экрана
-        setSize(WIDTH, HEIGHT);
+        setBounds(POS_X, POS_Y, WIDTH, HEIGHT);
         setTitle(TITLE);
         setResizable(false);
         setAlwaysOnTop(true);
@@ -132,7 +134,7 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
         } else if (src == btnUpdateInfo) {
             UpdateUserModal modal = new UpdateUserModal();
             String[] arr = modal.showModal(this);
-            updateUser(socketThread,arr);
+            updateUser(socketThread, arr);
         } else if (src == btnDisconnect) {
             socketThread.close();
         } else {
@@ -163,9 +165,10 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
         t.sendMessage(Messages.getTypeRegister(arr[0], arr[1], arr[2]));
     }
 
-    private void updateUser(SocketThread t, String[] arr){
-        t.sendMessage(Messages.getTypeNickUpdate(arr[0],arr[1]));
+    private void updateUser(SocketThread t, String[] arr) {
+        t.sendMessage(Messages.getTypeNickUpdate(arr[0], arr[1]));
     }
+
     private void sendMessage() {
         String msg = tfMessage.getText();
         String username = tfLogin.getText();
@@ -257,7 +260,7 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
                 putLog(value);
                 break;
             case Messages.MSG_FORMAT_ERROR:
-                putLog(value);
+                putLog("Ошибка в сообщении:  " + arr[1]);
                 socketThread.close();
                 break;
             case Messages.USER_LIST:

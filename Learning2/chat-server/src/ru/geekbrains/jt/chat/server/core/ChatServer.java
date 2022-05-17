@@ -22,14 +22,14 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
 
     private final int SERVER_SOCKET_TIMEOUT = 2000;
     private final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss: ");
-    private Vector<SocketThread> clients = new Vector<>();
+    private final Vector<SocketThread> clients = new Vector<>();
 
     private static final long TIMEOUT = 10_000;
 //    private static final long TIMEOUT = 120_000;
 
     int counter = 0;
     ServerSocketThread server;
-    ChatServerListener listener;
+    final ChatServerListener listener;
 
     public ChatServer(ChatServerListener listener) {
         this.listener = listener;
@@ -145,15 +145,13 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         String[] arr = msg.split(Messages.DELIMITER);
         String msgType = arr[0];
         switch (msgType) {
-            case Messages.USER_BROADCAST:
-                sendToAllAuthorized(Messages.getTypeBroadcast(client.getNickname(), arr[1]));
-                break;
-            case Messages.USER_NICK_UPDATE:
+            case Messages.USER_BROADCAST ->
+                    sendToAllAuthorized(Messages.getTypeBroadcast(client.getNickname(), arr[1]));
+            case Messages.USER_NICK_UPDATE -> {
                 putLog(Arrays.toString(arr));
                 updateNick(client, arr);
-                break;
-            default:
-                client.msgFormatError(msg);
+            }
+            default -> client.msgFormatError(msg);
         }
 
     }
@@ -179,12 +177,17 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
 
     private void registrationRequest(ClientThread client, String[] arr) {
         try {
-            boolean flag = DBUtils.registerUser(conn, arr[1], arr[2], arr[3]);
-            if (flag) {
+            if(DBUtils.registerUser(conn, arr[1], arr[2], arr[3])>0){
                 client.authAccept(arr[3]);
+                String msg = "Клиент " + client.getNickname() + "   зарегистрировался";
+                sendToAllAuthorized(Messages.getTypeBroadcast("Server", msg));
+                sendToAllAuthorized(Messages.getUserList(getUsers()));
+            } else {
+                client.msgFormatError("Ошибка регистрации, не удалось добавить пользователя ");
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            client.msgFormatError("Ошибка регистрации " + e.getErrorCode());
             putLog(e.getMessage());
         }
     }
@@ -192,7 +195,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     private void updateNick(ClientThread client, String[] arr) {
         try {
             int flag = DBUtils.updateUserNick(conn, arr[1], arr[2]);
-            if (flag>0) {
+            if (flag > 0) {
                 String msg = client.getNickname() + " сменил ник на " + arr[2];
                 sendToAllAuthorized(Messages.getTypeBroadcast("Server", msg));
                 client.setNickname(arr[2]);
