@@ -9,6 +9,8 @@ public class Messages {
     public static final String MSG_FORMAT_ERROR = "/msg_error";
     public static final String USER_LIST = "/user_list";
     public static final String USER_BROADCAST = "/user_bcast";
+    public static final String USER_REGISTER = "/register";
+    public static final String USER_NICK_UPDATE = "/nick_update";
 
     public static String getTypeBcastFromClient(String msg) {
         return USER_BROADCAST + DELIMITER + msg;
@@ -37,5 +39,13 @@ public class Messages {
     public static String getTypeBroadcast(String src, String message) {
         return MSG_BROADCAST + DELIMITER + System.currentTimeMillis() +
                 DELIMITER + src + DELIMITER + message;
+    }
+
+    public static String getTypeRegister(String login, String password, String nick){
+        return USER_REGISTER + DELIMITER + login + DELIMITER + password + DELIMITER + nick;
+    }
+
+    public static String getTypeNickUpdate(String login, String nick){
+        return USER_NICK_UPDATE + DELIMITER + login + DELIMITER + nick;
     }
 }

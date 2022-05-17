@@ -1,6 +1,8 @@
 package ru.geekbrains.jt.chat.server.core;
 
 import ru.geekbrains.jt.chat.common.Messages;
+import ru.geekbrains.jt.chat.server.dbWork.DBUtils;
+import ru.geekbrains.jt.chat.server.dbWork.SqlClient;
 import ru.geekbrains.jt.network.ServerSocketThread;
 import ru.geekbrains.jt.network.ServerSocketThreadListener;
 import ru.geekbrains.jt.network.SocketThread;
@@ -8,16 +10,22 @@ import ru.geekbrains.jt.network.SocketThreadListener;
 
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Vector;
 
 public class ChatServer implements ServerSocketThreadListener, SocketThreadListener {
+    private Connection conn;
+
     private final int SERVER_SOCKET_TIMEOUT = 2000;
     private final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss: ");
     private Vector<SocketThread> clients = new Vector<>();
 
-    private final long TIMEOUT = 120_000;
+    private static final long TIMEOUT = 10_000;
+//    private static final long TIMEOUT = 120_000;
 
     int counter = 0;
     ServerSocketThread server;
@@ -57,13 +65,17 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     @Override
     public void onServerStart(ServerSocketThread thread) {
         putLog("Server thread started");
-        SqlClient.connect();
+        try {
+            conn = SqlClient.connect();
+        } catch (ClassNotFoundException | SQLException ef) {
+            throw new RuntimeException(ef);
+        }
     }
 
     @Override
     public void onServerStop(ServerSocketThread thread) {
         putLog("Server thread stopped");
-        SqlClient.disconnect();
+        SqlClient.disconnect(conn);
         for (int i = 0; i < clients.size(); i++) {
             clients.get(i).close();
         }
@@ -122,7 +134,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         if (client.isAuthorized()) {
             handleAuthMsg(client, msg);
         } else {
-            if (System.currentTimeMillis() > client.getConnectTime() + TIMEOUT){
+            if (System.currentTimeMillis() > client.getConnectTime() + TIMEOUT) {
                 client.close();
             }
             handleNonAuthMsg(client, msg);
@@ -136,9 +148,14 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
             case Messages.USER_BROADCAST:
                 sendToAllAuthorized(Messages.getTypeBroadcast(client.getNickname(), arr[1]));
                 break;
+            case Messages.USER_NICK_UPDATE:
+                putLog(Arrays.toString(arr));
+                updateNick(client, arr);
+                break;
             default:
                 client.msgFormatError(msg);
         }
+
     }
 
     private void sendToAllAuthorized(String msg) {
@@ -151,13 +168,52 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
 
     private void handleNonAuthMsg(ClientThread client, String msg) {
         String[] arr = msg.split(Messages.DELIMITER);
-        if (arr.length != 3 || !arr[0].equals(Messages.AUTH_REQUEST)) {
+        if (arr.length == 3 && arr[0].equals(Messages.AUTH_REQUEST)) {
+            authClient(client, arr);
+        } else if (arr.length == 4 && arr[0].equals(Messages.USER_REGISTER)) {
+            registrationRequest(client, arr);
+        } else {
             client.msgFormatError(msg);
-            return;
         }
+    }
+
+    private void registrationRequest(ClientThread client, String[] arr) {
+        try {
+            boolean flag = DBUtils.registerUser(conn, arr[1], arr[2], arr[3]);
+            if (flag) {
+                client.authAccept(arr[3]);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            putLog(e.getMessage());
+        }
+    }
+
+    private void updateNick(ClientThread client, String[] arr) {
+        try {
+            int flag = DBUtils.updateUserNick(conn, arr[1], arr[2]);
+            if (flag>0) {
+                String msg = client.getNickname() + " сменил ник на " + arr[2];
+                sendToAllAuthorized(Messages.getTypeBroadcast("Server", msg));
+                client.setNickname(arr[2]);
+                sendToAllAuthorized(Messages.getUserList(getUsers()));
+            } else {
+                client.msgFormatError("ошибка смены ника");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void authClient(ClientThread client, String[] arr) {
         String login = arr[1];
         String password = arr[2];
-        String nickname = SqlClient.getNick(login, password);
+        String nickname = null;
+        try {
+            nickname = DBUtils.getNick(conn, login, password);
+        } catch (SQLException e) {
+            putLog(e.getSQLState());
+        }
         if (nickname == null) {
             putLog("Invalid login attempt " + login);
             client.authFail();
