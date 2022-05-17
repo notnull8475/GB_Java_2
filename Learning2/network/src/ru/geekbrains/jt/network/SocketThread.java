@@ -29,7 +29,9 @@ public class SocketThread extends Thread {
                 listener.onReceiveString(this, socket, msg);
             }
         } catch (IOException e) {
-            listener.onSocketException(this, e);
+            if (!isInterrupted()) {
+                listener.onSocketException(this, e);
+            }
         } finally {
             try {
                 socket.close();
