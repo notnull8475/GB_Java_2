@@ -3,7 +3,7 @@ package ru.geekbrains.jt.network;
 import java.net.Socket;
 
 public interface SocketThreadListener {
-    void onSocketStart();
+    void onSocketStart(SocketThread t, Socket s);
     void onSocketStop(SocketThread t);
 
     void onSocketReady(SocketThread t, Socket socket);

@@ -167,7 +167,7 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
     }
 
     @Override
-    public void onSocketStart() {
+    public void onSocketStart(SocketThread t, Socket s) {
         putLog("Start");
     }
 

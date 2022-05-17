@@ -96,7 +96,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
      */
 
     @Override
-    public synchronized void onSocketStart() {
+    public synchronized void onSocketStart(SocketThread t, Socket s) {
         putLog("Client connected");
     }
 
