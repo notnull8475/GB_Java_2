@@ -18,19 +18,24 @@ import java.util.Arrays;
 public class Client extends JFrame implements ActionListener, Thread.UncaughtExceptionHandler, SocketThreadListener {
     private static final int WIDTH = 600;
     private static final int HEIGHT = 300;
+    private static final int POS_X = 400;
+    private static final int POS_Y = 200;
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss: ");
     private static final String TITLE = "Chat Client";
     private final JTextArea log = new JTextArea();
 
-    private final JPanel panelTop = new JPanel(new GridLayout(2, 3));
+    private final JPanel panelTop = new JPanel(new GridLayout(2, 4));
     private final JTextField tfIPAddress = new JTextField("127.0.0.1");
     private final JTextField tfPort = new JTextField("8189");
     private final JCheckBox cbAlwaysOnTop = new JCheckBox("Always on top");
+    private final JCheckBox cbResizable = new JCheckBox("Resizable");
     private final JTextField tfLogin = new JTextField("notnull");
     private final JPasswordField tfPassword = new JPasswordField("123");
     private final JButton btnLogin = new JButton("Login");
+    private final JButton btnRegister = new JButton("SignUp");
+    private final JButton btnUpdateInfo = new JButton("Edit");
 
-    private final JPanel panelBottom = new JPanel(new BorderLayout());
+    private final JPanel panelBottom = new JPanel(new GridLayout(1, 4));
     private final JButton btnDisconnect = new JButton("Disconnect");
     private final JTextField tfMessage = new JTextField();
     private final JButton btnSend = new JButton("<html><b>Send</b></html>");
@@ -39,14 +44,18 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
     private boolean shownIoErrors = false;
     private SocketThread socketThread;
 
+    private boolean socketReady = false;
+    private static final long TIMEOUT = 10_000;
 
     private Client() {
         Thread.setDefaultUncaughtExceptionHandler(this);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null); //посреди экрана
-        setSize(WIDTH, HEIGHT);
+        setBounds(POS_X, POS_Y, WIDTH, HEIGHT);
         setTitle(TITLE);
         setResizable(false);
+        setAlwaysOnTop(true);
+        cbAlwaysOnTop.setSelected(true);
         log.setEditable(false);
         log.setLineWrap(true);
         JScrollPane spLog = new JScrollPane(log);
@@ -56,18 +65,24 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
         btnSend.addActionListener(this);
         tfMessage.addActionListener(this);
         btnLogin.addActionListener(this);
+        btnRegister.addActionListener(this);
         btnDisconnect.addActionListener(this);
+        btnUpdateInfo.addActionListener(this);
+
         panelBottom.setVisible(false);
 
         panelTop.add(tfIPAddress);
         panelTop.add(tfPort);
         panelTop.add(cbAlwaysOnTop);
+        panelTop.add(cbResizable);
         panelTop.add(tfLogin);
         panelTop.add(tfPassword);
         panelTop.add(btnLogin);
-        panelBottom.add(btnDisconnect, BorderLayout.WEST);
-        panelBottom.add(tfMessage, BorderLayout.CENTER);
-        panelBottom.add(btnSend, BorderLayout.EAST);
+        panelTop.add(btnRegister);
+        panelBottom.add(btnDisconnect);
+        panelBottom.add(tfMessage);
+        panelBottom.add(btnSend);
+        panelBottom.add(btnUpdateInfo);
 
         add(panelBottom, BorderLayout.SOUTH);
         add(panelTop, BorderLayout.NORTH);
@@ -91,10 +106,35 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
         Object src = e.getSource();
         if (src == cbAlwaysOnTop) {
             setAlwaysOnTop(cbAlwaysOnTop.isSelected());
+        } else if (src == cbResizable) {
+            setResizable(!cbResizable.isSelected());
         } else if (src == btnSend || src == tfMessage) {
             sendMessage();
         } else if (src == btnLogin) {
             connect();
+            long time = System.currentTimeMillis() + TIMEOUT;
+            while (System.currentTimeMillis() < time) {
+                if (socketReady) {
+                    logIn(socketThread);
+                    break;
+                }
+            }
+        } else if (src == btnRegister) {
+            System.out.println("register modal window");
+            RegisterModal dialog = new RegisterModal();
+            String[] arr = dialog.showModal(this);
+            connect();
+            long time = System.currentTimeMillis() + TIMEOUT;
+            while (System.currentTimeMillis() < time) {
+                if (socketReady) {
+                    register(socketThread, arr);
+                    break;
+                }
+            }
+        } else if (src == btnUpdateInfo) {
+            UpdateUserModal modal = new UpdateUserModal();
+            String[] arr = modal.showModal(this);
+            updateUser(socketThread, arr);
         } else if (src == btnDisconnect) {
             socketThread.close();
         } else {
@@ -110,6 +150,25 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
             showException(Thread.currentThread(), e);
         }
     }
+
+    private void logIn(SocketThread t) {
+        panelBottom.setVisible(true);
+        panelTop.setVisible(false);
+        String login = tfLogin.getText();
+        String pass = new String(tfPassword.getPassword());
+        t.sendMessage(Messages.getAuthRequest(login, pass));
+    }
+
+    private void register(SocketThread t, String[] arr) {
+        panelBottom.setVisible(true);
+        panelTop.setVisible(false);
+        t.sendMessage(Messages.getTypeRegister(arr[0], arr[1], arr[2]));
+    }
+
+    private void updateUser(SocketThread t, String[] arr) {
+        t.sendMessage(Messages.getTypeNickUpdate(arr[0], arr[1]));
+    }
+
     private void sendMessage() {
         String msg = tfMessage.getText();
         String username = tfLogin.getText();
@@ -181,11 +240,8 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
 
     @Override
     public void onSocketReady(SocketThread t, Socket socket) {
-        panelBottom.setVisible(true);
-        panelTop.setVisible(false);
-        String login = tfLogin.getText();
-        String pass = new String(tfPassword.getPassword());
-        t.sendMessage(Messages.getAuthRequest(login, pass));
+        putLog("socket ready");
+        socketReady = true;
     }
 
     @Override
@@ -204,7 +260,7 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
                 putLog(value);
                 break;
             case Messages.MSG_FORMAT_ERROR:
-                putLog(value);
+                putLog("Ошибка в сообщении:  " + arr[1]);
                 socketThread.close();
                 break;
             case Messages.USER_LIST:

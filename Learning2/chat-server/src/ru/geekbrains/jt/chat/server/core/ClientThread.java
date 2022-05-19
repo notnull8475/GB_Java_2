@@ -11,7 +11,7 @@ public class ClientThread extends SocketThread {
     private boolean isAuthorized;
     private boolean isReconnecting;
 
-    private long connectTime;
+    private final long connectTime;
 
     public ClientThread(SocketThreadListener listener, String name, Socket socket) {
         super(listener, name, socket);
@@ -24,6 +24,9 @@ public class ClientThread extends SocketThread {
 
     public String getNickname() {
         return nickname;
+    }
+    public void setNickname(String nickname){
+        this.nickname = nickname;
     }
 
     public boolean isAuthorized() {
