@@ -8,10 +8,10 @@ import java.sql.SQLException;
 public class DBUtils {
 
     private static final String GET_NICK = "select nickname from users where login=? and password=?";
-    private static final String REGISTER_USER = "insert into users(login, password,nickname) values(?,?,?)";
-    private static final String UPDATE_USER_NICK = "update users set nickname=? where login=?";
+    private  final String REGISTER_USER = "insert into users(login, password,nickname) values(?,?,?)";
+    private  final String UPDATE_USER_NICK = "update users set nickname=? where login=?";
 
-    public synchronized static String getNick(Connection conn, String login, String password) throws SQLException {
+    public synchronized String getNick(Connection conn, String login, String password) throws SQLException {
         PreparedStatement ps = conn.prepareStatement(GET_NICK);
         ps.setString(1, login);
         ps.setString(2, password);
@@ -21,7 +21,7 @@ public class DBUtils {
         } else return null;
     }
 
-    public synchronized static int registerUser(Connection conn, String login, String password, String nick) throws SQLException {
+    public synchronized int registerUser(Connection conn, String login, String password, String nick) throws SQLException {
         PreparedStatement ps = conn.prepareStatement(REGISTER_USER);
         ps.setString(1, login);
         ps.setString(2, password);
@@ -29,7 +29,7 @@ public class DBUtils {
         return ps.executeUpdate();
     }
 
-    public synchronized static int updateUserNick(Connection conn, String login, String nick) throws SQLException {
+    public synchronized int updateUserNick(Connection conn, String login, String nick) throws SQLException {
         PreparedStatement ps = conn.prepareStatement(UPDATE_USER_NICK);
         ps.setString(1, nick);
         ps.setString(2, login);

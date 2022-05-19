@@ -24,6 +24,8 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     private final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss: ");
     private final Vector<SocketThread> clients = new Vector<>();
 
+    private DBUtils dbUtils;
+
     private static final long TIMEOUT = 10_000;
 //    private static final long TIMEOUT = 120_000;
 
@@ -33,6 +35,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
 
     public ChatServer(ChatServerListener listener) {
         this.listener = listener;
+        dbUtils = new DBUtils();
     }
 
     public void start(int port) {
@@ -177,7 +180,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
 
     private void registrationRequest(ClientThread client, String[] arr) {
         try {
-            if(DBUtils.registerUser(conn, arr[1], arr[2], arr[3])>0){
+            if(dbUtils.registerUser(conn, arr[1], arr[2], arr[3])>0){
                 client.authAccept(arr[3]);
                 String msg = "Клиент " + client.getNickname() + "   зарегистрировался";
                 sendToAllAuthorized(Messages.getTypeBroadcast("Server", msg));
@@ -194,7 +197,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
 
     private void updateNick(ClientThread client, String[] arr) {
         try {
-            int flag = DBUtils.updateUserNick(conn, arr[1], arr[2]);
+            int flag = dbUtils.updateUserNick(conn, arr[1], arr[2]);
             if (flag > 0) {
                 String msg = client.getNickname() + " сменил ник на " + arr[2];
                 sendToAllAuthorized(Messages.getTypeBroadcast("Server", msg));
@@ -213,7 +216,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         String password = arr[2];
         String nickname = null;
         try {
-            nickname = DBUtils.getNick(conn, login, password);
+            nickname = dbUtils.getNick(conn, login, password);
         } catch (SQLException e) {
             putLog(e.getSQLState());
         }
