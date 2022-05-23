@@ -20,7 +20,7 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
     private static final int HEIGHT = 300;
     private static final int POS_X = 400;
     private static final int POS_Y = 200;
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss: ");
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
     private static final String TITLE = "Chat Client";
     private final JTextArea log = new JTextArea();
 
@@ -46,6 +46,8 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
 
     private boolean socketReady = false;
     private static final long TIMEOUT = 10_000;
+
+    private String nickname;
 
     private Client() {
         Thread.setDefaultUncaughtExceptionHandler(this);
@@ -171,21 +173,16 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
 
     private void sendMessage() {
         String msg = tfMessage.getText();
-        String username = tfLogin.getText();
         if ("".equals(msg)) return;
         tfMessage.setText(null);
         tfMessage.grabFocus();
         socketThread.sendMessage(Messages.getTypeBcastFromClient(msg));
-//        tfMessage.requestFocusInWindow();
-//        putLog(String.format("%s: %s", username, msg));
-        //wrtMsgToLogFile(msg, username);
-
     }
 //codewars, hackerrank, leetcode, codegame
 
     private void wrtMsgToLogFile(String msg, String username) {
-        try (FileWriter out = new FileWriter("log.txt", true)) {
-            out.write(username + ": " + msg + "\n");
+        try (FileWriter out = new FileWriter("history_"+username+".txt", true)) {
+            out.write(msg + "\n");
             out.flush();
         } catch (IOException e) {
             if (!shownIoErrors) {
@@ -254,7 +251,8 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
         String msgType = arr[0];
         switch (msgType) {
             case Messages.AUTH_ACCEPT:
-                setTitle(TITLE + " logged in as: " + arr[1]);
+                nickname = arr[1];
+                setTitle(TITLE + " logged in as: " + nickname);
                 break;
             case Messages.AUTH_DENY:
                 putLog(value);
@@ -271,8 +269,9 @@ public class Client extends JFrame implements ActionListener, Thread.UncaughtExc
                 userList.setListData(usersArr);
                 break;
             case Messages.MSG_BROADCAST:
-                log.append(DATE_FORMAT.format(Long.parseLong(arr[1])) + ": " + arr[2] + ": " + arr[3] + "\n");
-                log.setCaretPosition(log.getDocument().getLength());
+                String msg = DATE_FORMAT.format(Long.parseLong(arr[1])) + ": " + arr[2] + ": " + arr[3];
+                putLog(msg);
+                wrtMsgToLogFile(msg, nickname);
                 break;
             default:
                 throw new RuntimeException("Unknown message type: " + msgType);

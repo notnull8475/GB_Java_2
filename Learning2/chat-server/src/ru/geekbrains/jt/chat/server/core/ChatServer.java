@@ -3,6 +3,7 @@ package ru.geekbrains.jt.chat.server.core;
 import ru.geekbrains.jt.chat.common.Messages;
 import ru.geekbrains.jt.chat.server.dbWork.DBUtils;
 import ru.geekbrains.jt.chat.server.dbWork.SqlClient;
+import ru.geekbrains.jt.chat.server.utils.LimitedQueue;
 import ru.geekbrains.jt.network.ServerSocketThread;
 import ru.geekbrains.jt.network.ServerSocketThreadListener;
 import ru.geekbrains.jt.network.SocketThread;
@@ -14,15 +15,20 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 
 public class ChatServer implements ServerSocketThreadListener, SocketThreadListener {
     private Connection conn;
 
     private final int SERVER_SOCKET_TIMEOUT = 2000;
+    private final int MSG_NUMB = 100;
+    private LimitedQueue<String> chatHistory;
     private final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss: ");
     private final Vector<SocketThread> clients = new Vector<>();
+
 
     private DBUtils dbUtils;
 
@@ -36,6 +42,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     public ChatServer(ChatServerListener listener) {
         this.listener = listener;
         dbUtils = new DBUtils();
+        chatHistory = new LimitedQueue<>(MSG_NUMB);
     }
 
     public void start(int port) {
@@ -148,8 +155,11 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         String[] arr = msg.split(Messages.DELIMITER);
         String msgType = arr[0];
         switch (msgType) {
-            case Messages.USER_BROADCAST ->
-                    sendToAllAuthorized(Messages.getTypeBroadcast(client.getNickname(), arr[1]));
+            case Messages.USER_BROADCAST -> {
+                String m = Messages.getTypeBroadcast(client.getNickname(), arr[1]);
+                sendToAllAuthorized(m);
+                chatHistory.add(m);
+            }
             case Messages.USER_NICK_UPDATE -> {
                 putLog(Arrays.toString(arr));
                 updateNick(client, arr);
@@ -228,9 +238,12 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
             ClientThread oldClient = findClientByNickname(nickname);
             client.authAccept(nickname);
             if (oldClient == null) {
-                sendToAllAuthorized(Messages.getTypeBroadcast("Server", nickname + " connected."));
+                String msg = Messages.getTypeBroadcast("Server", nickname + " connected.");
+                sendToAllAuthorized(msg);
+                sendHistory(client);
             } else {
                 oldClient.reconnect();
+                sendHistory(oldClient);
                 clients.remove(oldClient);
             }
         }
@@ -260,5 +273,11 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
                 return client;
         }
         return null;
+    }
+
+    private synchronized void sendHistory(ClientThread c){
+        for (String s : chatHistory) {
+            c.sendMessage(s);
+        }
     }
 }
