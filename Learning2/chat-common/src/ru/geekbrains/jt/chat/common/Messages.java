@@ -41,11 +41,11 @@ public class Messages {
                 DELIMITER + src + DELIMITER + message;
     }
 
-    public static String getTypeRegister(String login, String password, String nick){
+    public static String getTypeRegister(String login, String password, String nick) {
         return USER_REGISTER + DELIMITER + login + DELIMITER + password + DELIMITER + nick;
     }
 
-    public static String getTypeNickUpdate(String login, String nick){
+    public static String getTypeNickUpdate(String login, String nick) {
         return USER_NICK_UPDATE + DELIMITER + login + DELIMITER + nick;
     }
 }
