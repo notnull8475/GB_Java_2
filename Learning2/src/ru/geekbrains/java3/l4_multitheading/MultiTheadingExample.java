@@ -16,7 +16,29 @@ public class MultiTheadingExample {
 
 //        futureExample();
 
-//        ExecutorService executorService = ExecutorService
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        for (int i = 0; i < 10; i++) {
+            int j = i;
+//            Future<String> f  = executorService.submit()
+            executorService.execute(() -> {
+                System.out.println("Thread is run "  + Thread.currentThread().getName());
+                try {
+                    Thread.sleep((long) (2000 * Math.random()));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("Task is finished");
+            });
+        }
+        System.out.println("All tasks are given");
+        executorService.shutdown();
+
+//        ExecutorService es = Executors.newSingleThreadExecutor(new ThreadFactory() {
+//            @Override
+//            public Thread newThread(Runnable r) {
+//                return null;
+//            }
+//        });
 
     }
 
@@ -31,7 +53,7 @@ public class MultiTheadingExample {
 
         new Thread(futureTask).start();
 
-        String result =null;
+        String result = null;
         try {
             result = futureTask.get(1, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {

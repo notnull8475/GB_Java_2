@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class ChatServer implements ServerSocketThreadListener, SocketThreadListener {
     private Connection conn;
@@ -89,6 +92,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         for (int i = 0; i < clients.size(); i++) {
             clients.get(i).close();
         }
+//        clients.shutdownNow();
     }
 
     @Override
@@ -125,7 +129,8 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     @Override
     public synchronized void onSocketStop(SocketThread t) {
         ClientThread client = (ClientThread) t;
-        clients.remove(client);
+//        clients.
+//        clients.remove(client);
         if (client.isAuthorized() && !client.isReconnecting()) {
             sendToAllAuthorized(Messages.getTypeBroadcast("Server", client.getNickname() + " disconnected"));
         }
@@ -135,7 +140,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     @Override
     public synchronized void onSocketReady(SocketThread t, Socket socket) {
         putLog("client is ready");
-        clients.add(t);
+//        clients.add(t);
     }
 
     @Override
