@@ -1,9 +1,9 @@
-package ru.geekbrains.lesson3.homework.task1;
+package ru.geekbrains.java2.lesson3.homework.task1;
 
 import java.util.*;
 
-import static ru.geekbrains.lesson3.homework.task1.ArrayTask.words;
-import static ru.geekbrains.lesson3.homework.task1.ArrayTask.wordsToArray;
+import static ru.geekbrains.java2.lesson3.homework.task1.ArrayTask.words;
+import static ru.geekbrains.java2.lesson3.homework.task1.ArrayTask.wordsToArray;
 
 public class ArrayTaskWithMap {
 

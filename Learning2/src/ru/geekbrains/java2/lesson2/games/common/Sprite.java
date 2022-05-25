@@ -1,4 +1,4 @@
-package ru.geekbrains.lesson2.games.common;
+package ru.geekbrains.java2.lesson2.games.common;
 
 
 public abstract class Sprite implements CommonObject{

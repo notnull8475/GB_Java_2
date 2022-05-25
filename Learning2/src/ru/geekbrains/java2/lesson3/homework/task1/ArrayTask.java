@@ -1,4 +1,4 @@
-package ru.geekbrains.lesson3.homework.task1;
+package ru.geekbrains.java2.lesson3.homework.task1;
 
 public class ArrayTask {
     public static final String words = "Lorem ipsum dolor ipsum ipsum consectetur consectetur consectetur Blanditiis pariatur numquam aliquam consequuntur Blanditiis eos eos eos aspernatur fuga voluptates";

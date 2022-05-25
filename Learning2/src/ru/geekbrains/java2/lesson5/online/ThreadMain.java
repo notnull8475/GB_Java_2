@@ -1,4 +1,4 @@
-package ru.geekbrains.lesson5.online;
+package ru.geekbrains.java2.lesson5.online;
 
 public class ThreadMain {
 

@@ -1,8 +1,8 @@
-package ru.geekbrains.lesson2.games.circles;
+package ru.geekbrains.java2.lesson2.games.circles;
 
-import ru.geekbrains.lesson2.games.common.CommonObject;
-import ru.geekbrains.lesson2.games.common.GameCanvas;
-import ru.geekbrains.lesson2.games.common.Sprite;
+import ru.geekbrains.java2.lesson2.games.common.CommonObject;
+import ru.geekbrains.java2.lesson2.games.common.GameCanvas;
+import ru.geekbrains.java2.lesson2.games.common.Sprite;
 
 import java.awt.*;
 import java.util.Random;

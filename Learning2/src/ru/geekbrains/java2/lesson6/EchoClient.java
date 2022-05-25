@@ -1,4 +1,4 @@
-package ru.geekbrains.lesson6;
+package ru.geekbrains.java2.lesson6;
 
 import java.io.*;
 import java.net.Socket;

@@ -1,11 +1,8 @@
-package ru.geekbrains.lesson3.homework.task1;
+package ru.geekbrains.java2.lesson3.homework.task1;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
-import static ru.geekbrains.lesson3.homework.task1.ArrayTask.words;
-import static ru.geekbrains.lesson3.homework.task1.ArrayTask.wordsToArray;
 
 public class ArrayTaskWithSet {
 
@@ -28,7 +25,7 @@ public class ArrayTaskWithSet {
     }
 
     public static void main(String[] args) {
-        String[] wordsArray = wordsToArray(words);
+        String[] wordsArray = ArrayTask.wordsToArray(ArrayTask.words);
 
         Set<String> set = stringSet(wordsArray);
 

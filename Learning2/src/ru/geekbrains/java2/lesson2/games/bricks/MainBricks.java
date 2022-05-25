@@ -1,9 +1,9 @@
-package ru.geekbrains.lesson2.games.bricks;
+package ru.geekbrains.java2.lesson2.games.bricks;
 
-import ru.geekbrains.lesson2.games.circles.Background;
-import ru.geekbrains.lesson2.games.common.CommonObject;
-import ru.geekbrains.lesson2.games.common.ControllerInterface;
-import ru.geekbrains.lesson2.games.common.GameCanvas;
+import ru.geekbrains.java2.lesson2.games.circles.Background;
+import ru.geekbrains.java2.lesson2.games.common.CommonObject;
+import ru.geekbrains.java2.lesson2.games.common.ControllerInterface;
+import ru.geekbrains.java2.lesson2.games.common.GameCanvas;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,6 +1,4 @@
-package ru.geekbrains.lesson2.games.common;
-
-import ru.geekbrains.lesson2.games.circles.MainCircles;
+package ru.geekbrains.java2.lesson2.games.common;
 
 import javax.swing.*;
 import java.awt.*;

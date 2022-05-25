@@ -1,4 +1,4 @@
-package ru.geekbrains.lesson3.online;
+package ru.geekbrains.java2.lesson3.online;
 
 import java.io.Closeable;
 import java.io.FileNotFoundException;

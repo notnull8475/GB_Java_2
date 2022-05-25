@@ -1,4 +1,4 @@
-package ru.geekbrains.lesson2.homeWork;
+package ru.geekbrains.java2.lesson2.homeWork;
 
 
 import java.util.Random;

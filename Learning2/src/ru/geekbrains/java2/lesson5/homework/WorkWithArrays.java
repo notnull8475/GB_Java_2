@@ -1,4 +1,4 @@
-package ru.geekbrains.lesson5.homework;
+package ru.geekbrains.java2.lesson5.homework;
 
 public class WorkWithArrays {
     static final int size = 10000000;
