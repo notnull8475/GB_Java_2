@@ -1,15 +1,15 @@
 package ru.geekbrains.java3.hw4;
 
-public class ThreeTheads {
+public class ThreeThreads {
     private final Object mon = new Object();
     private volatile char currentLetter = 'A';
 
     public static void main(String[] args) {
-        ThreeTheads threeTheads = new ThreeTheads();
+        ThreeThreads threeThreads = new ThreeThreads();
 
-        Thread thread1 = new Thread(threeTheads::printA);
-        Thread thread2 = new Thread(threeTheads::printB);
-        Thread thread3 = new Thread(threeTheads::printC);
+        Thread thread1 = new Thread(threeThreads::printA);
+        Thread thread2 = new Thread(threeThreads::printB);
+        Thread thread3 = new Thread(threeThreads::printC);
         thread1.start();
         thread2.start();
         thread3.start();

@@ -1,8 +1,8 @@
-package ru.geekbrains.java3.l4_multitheading;
+package ru.geekbrains.java3.l4_multithreading;
 
 import java.util.concurrent.*;
 
-public class MultiTheadingExample {
+public class MultiThreadingExample {
 
     public static void main(String[] args) {
 
