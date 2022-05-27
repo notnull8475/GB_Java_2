@@ -1,16 +1,21 @@
 package ru.geekbrains.java3.hm5;
 
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.Semaphore;
 
-public class MainClass {
+public class MainClass implements WinnerSaver {
     public static final int CARS_COUNT = 4;
 
     static boolean nextFinish = false;
-    static String winner;
+    String winner = null;
+
     public static void main(String[] args) {
+        MainClass mainClass = new MainClass();
+        mainClass.startRacing();
+
+    }
+
+    private void startRacing() {
         System.out.println("ВАЖНОЕ ОБЪЯВЛЕНИЕ >>> Подготовка!!!");
 
 
@@ -30,12 +35,16 @@ public class MainClass {
         Car[] cars = new Car[CARS_COUNT];
 
         for (int i = 0; i < cars.length; i++) {
-            cars[i] = new Car(race, 20 + (int) (Math.random() * 10), startStop, tunnel);
+            cars[i] = new Car(race, 20 + (int) (Math.random() * 10), startStop, tunnel, this);
         }
         for (int i = 0; i < cars.length; i++) {
             new Thread(cars[i]).start();
         }
+    }
 
+    @Override
+    public void saveWinner(String winner) {
+        this.winner = winner;
     }
 }
 

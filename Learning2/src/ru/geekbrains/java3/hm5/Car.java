@@ -21,13 +21,16 @@ public class Car implements Runnable {
         return speed;
     }
 
-    public Car(Race race, int speed, CyclicBarrier cyclicBarrier, Semaphore semaphore) {
+    WinnerSaver saver;
+
+    public Car(Race race, int speed, CyclicBarrier cyclicBarrier, Semaphore semaphore, WinnerSaver winnerSaver) {
         this.race = race;
         this.speed = speed;
         CARS_COUNT++;
         this.name = "Участник #" + CARS_COUNT;
         this.cyclicBarrier = cyclicBarrier;
         this.semaphore = semaphore;
+        this.saver = winnerSaver;
     }
 
     @Override
@@ -46,7 +49,7 @@ public class Car implements Runnable {
         if (!WINNER){
             WINNER=true;
             System.out.println(name + " WIN");
-
+            saver.saveWinner(name);
         }
         try {
             cyclicBarrier.await();
