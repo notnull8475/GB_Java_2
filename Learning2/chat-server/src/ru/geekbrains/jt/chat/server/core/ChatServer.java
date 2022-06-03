@@ -1,5 +1,7 @@
 package ru.geekbrains.jt.chat.server.core;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.geekbrains.jt.chat.common.Messages;
 import ru.geekbrains.jt.chat.server.dbWork.DBUtils;
 import ru.geekbrains.jt.chat.server.dbWork.SqlClient;
@@ -18,10 +20,9 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Vector;
 
-
 public class ChatServer implements ServerSocketThreadListener, SocketThreadListener {
+    private static final Logger log = LogManager.getLogger(ChatServer.class);
     private Connection conn;
-
     private final int SERVER_SOCKET_TIMEOUT = 2000;
     private final int MSG_NUMB = 100;
     private LimitedQueue<String> chatHistory;
@@ -39,33 +40,37 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     final ChatServerListener listener;
 
     public ChatServer(ChatServerListener listener) {
+        log.debug("CHAT SERVER INIT, LISTENER - " + listener.toString());
         this.listener = listener;
         dbUtils = new DBUtils();
         chatHistory = new LimitedQueue<>(MSG_NUMB);
     }
 
     public void start(int port) {
+        log.debug("SERVER SOCKET THREAD TRY START");
         if (server != null && server.isAlive()) {
-            putLog("Server already started");
+            log.debug("SERVER ALREADY STARTED");
         } else {
+            log.debug("SERVER SOCKET THREAD START: PORT=" + port + " SERVER_SOCKET_TIMEOUT=" + SERVER_SOCKET_TIMEOUT);
             server = new ServerSocketThread(this, "Chat server " + counter++, port, SERVER_SOCKET_TIMEOUT);
         }
     }
 
     public void stop() {
+        log.debug("SERVER SOCKET THREAD TRY STOP");
         if (server == null || !server.isAlive()) {
-            putLog("Server is not running");
+            log.debug("SERVER IS NOT RUNNING");
         } else {
             server.interrupt();
         }
     }
 
-    private void putLog(String msg) {
-        msg = DATE_FORMAT.format(System.currentTimeMillis()) +
-                Thread.currentThread().getName() +
-                ": " + msg;
-        listener.onChatServerMessage(msg);
-    }
+//    private void log.debug(String msg) {
+//        msg = DATE_FORMAT.format(System.currentTimeMillis()) +
+//                Thread.currentThread().getName() +
+//                ": " + msg;
+//        listener.onChatServerMessage(msg);
+//    }
 
     /**
      * Server socket thread methods
@@ -73,17 +78,18 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
 
     @Override
     public void onServerStart(ServerSocketThread thread) {
-        putLog("Server thread started");
+        log.debug("SERVER THREAD STARTED");
         try {
             conn = SqlClient.connect();
         } catch (ClassNotFoundException | SQLException ef) {
+            log.debug("SQL CONNECTION ERROR\n" + ef.getMessage());
             throw new RuntimeException(ef);
         }
     }
 
     @Override
     public void onServerStop(ServerSocketThread thread) {
-        putLog("Server thread stopped");
+        log.debug("SERVER THREAD STOPPED");
         SqlClient.disconnect(conn);
         for (int i = 0; i < clients.size(); i++) {
             clients.get(i).close();
@@ -93,23 +99,26 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
 
     @Override
     public void onServerSocketCreated(ServerSocketThread t, ServerSocket s) {
-        putLog("Server socket created");
+        log.debug("SERVER SOCKET CREATED " + t.getName() + " SERVER_SOCKET" + s.toString());
     }
 
     @Override
     public void onServerSoTimeout(ServerSocketThread t, ServerSocket s) {
+        log.debug("SERVET TIMEOUT: " + t.getName() + "\nSERVER_SOCKET " + s.toString());
         //
     }
 
     @Override
     public void onSocketAccepted(ServerSocketThread t, ServerSocket s, Socket client) {
-        putLog("client connected");
+        log.debug("CLIENT CONNECTED");
         String name = "SocketThread" + client.getInetAddress() + ": " + client.getPort();
+        log.debug(name);
         new ClientThread(this, name, client);
     }
 
     @Override
     public void onServerException(ServerSocketThread t, Throwable e) {
+        log.error(e.getMessage());
         e.printStackTrace();
     }
 
@@ -119,14 +128,13 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
 
     @Override
     public synchronized void onSocketStart(SocketThread t, Socket s) {
-        putLog("Client connected");
+        log.debug("CLIENT CONNECTED");
     }
 
     @Override
     public synchronized void onSocketStop(SocketThread t) {
+        log.trace(t.getName() + " SOCKET STOP");
         ClientThread client = (ClientThread) t;
-//        clients.
-//        clients.remove(client);
         if (client.isAuthorized() && !client.isReconnecting()) {
             sendToAllAuthorized(Messages.getTypeBroadcast("Server", client.getNickname() + " disconnected"));
         }
@@ -135,12 +143,13 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
 
     @Override
     public synchronized void onSocketReady(SocketThread t, Socket socket) {
-        putLog("client is ready");
+        log.trace("client is ready");
 //        clients.add(t);
     }
 
     @Override
     public synchronized void onReceiveString(SocketThread t, Socket s, String msg) {
+        log.trace("RECEIVE ACTION\n" + t.getName() + " " + s.toString() + " \nMESSAGE" + msg);
         ClientThread client = (ClientThread) t;
         if (client.isAuthorized()) {
             handleAuthMsg(client, msg);
@@ -162,7 +171,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
                 chatHistory.add(m);
             }
             case Messages.USER_NICK_UPDATE -> {
-                putLog(Arrays.toString(arr));
+                log.info(Arrays.toString(arr));
                 updateNick(client, arr);
             }
             default -> client.msgFormatError(msg);
@@ -191,7 +200,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
 
     private void registrationRequest(ClientThread client, String[] arr) {
         try {
-            if(dbUtils.registerUser(conn, arr[1], arr[2], arr[3])>0){
+            if (dbUtils.registerUser(conn, arr[1], arr[2], arr[3]) > 0) {
                 client.authAccept(arr[3]);
                 String msg = "Клиент " + client.getNickname() + "   зарегистрировался";
                 sendToAllAuthorized(Messages.getTypeBroadcast("Server", msg));
@@ -202,7 +211,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         } catch (SQLException e) {
             e.printStackTrace();
             client.msgFormatError("Ошибка регистрации " + e.getErrorCode());
-            putLog(e.getMessage());
+            log.debug(e.getMessage());
         }
     }
 
@@ -229,10 +238,10 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         try {
             nickname = dbUtils.getNick(conn, login, password);
         } catch (SQLException e) {
-            putLog(e.getSQLState());
+            log.error(e.getSQLState());
         }
         if (nickname == null) {
-            putLog("Invalid login attempt " + login);
+            log.info("Invalid login attempt " + login);
             client.authFail();
             return;
         } else {
@@ -253,6 +262,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
 
     @Override
     public synchronized void onSocketException(SocketThread t, Throwable e) {
+        log.error(e.getMessage());
         e.printStackTrace();
     }
 
@@ -276,7 +286,8 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         return null;
     }
 
-    private synchronized void sendHistory(ClientThread c){
+    private synchronized void sendHistory(ClientThread c) {
+        log.trace("SEND HISTORY");
         for (String s : chatHistory) {
             c.sendMessage(s);
         }
