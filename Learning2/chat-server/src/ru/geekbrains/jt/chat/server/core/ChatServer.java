@@ -47,9 +47,9 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     }
 
     public void start(int port) {
-        log.debug("SERVER SOCKET THREAD TRY START");
+        log.trace("SERVER SOCKET THREAD TRY START");
         if (server != null && server.isAlive()) {
-            log.debug("SERVER ALREADY STARTED");
+            log.trace("SERVER ALREADY STARTED");
         } else {
             log.debug("SERVER SOCKET THREAD START: PORT=" + port + " SERVER_SOCKET_TIMEOUT=" + SERVER_SOCKET_TIMEOUT);
             server = new ServerSocketThread(this, "Chat server " + counter++, port, SERVER_SOCKET_TIMEOUT);
@@ -57,9 +57,9 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     }
 
     public void stop() {
-        log.debug("SERVER SOCKET THREAD TRY STOP");
+        log.info("SERVER SOCKET THREAD TRY STOP");
         if (server == null || !server.isAlive()) {
-            log.debug("SERVER IS NOT RUNNING");
+            log.info("SERVER IS NOT RUNNING");
         } else {
             server.interrupt();
         }
@@ -78,18 +78,18 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
 
     @Override
     public void onServerStart(ServerSocketThread thread) {
-        log.debug("SERVER THREAD STARTED");
+        log.trace("SERVER THREAD STARTED");
         try {
             conn = SqlClient.connect();
         } catch (ClassNotFoundException | SQLException ef) {
-            log.debug("SQL CONNECTION ERROR\n" + ef.getMessage());
+            log.error("SQL CONNECTION ERROR\n" + ef.getMessage());
             throw new RuntimeException(ef);
         }
     }
 
     @Override
     public void onServerStop(ServerSocketThread thread) {
-        log.debug("SERVER THREAD STOPPED");
+        log.trace("SERVER THREAD STOPPED");
         SqlClient.disconnect(conn);
         for (int i = 0; i < clients.size(); i++) {
             clients.get(i).close();
@@ -99,20 +99,20 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
 
     @Override
     public void onServerSocketCreated(ServerSocketThread t, ServerSocket s) {
-        log.debug("SERVER SOCKET CREATED " + t.getName() + " SERVER_SOCKET" + s.toString());
+        log.info("SERVER SOCKET CREATED " + t.getName() + " SERVER_SOCKET" + s.toString());
     }
 
     @Override
     public void onServerSoTimeout(ServerSocketThread t, ServerSocket s) {
-        log.debug("SERVET TIMEOUT: " + t.getName() + "\nSERVER_SOCKET " + s.toString());
+        log.info("SERVET TIMEOUT: " + t.getName() + "\nSERVER_SOCKET " + s.toString());
         //
     }
 
     @Override
     public void onSocketAccepted(ServerSocketThread t, ServerSocket s, Socket client) {
-        log.debug("CLIENT CONNECTED");
+        log.trace("CLIENT CONNECTED");
         String name = "SocketThread" + client.getInetAddress() + ": " + client.getPort();
-        log.debug(name);
+        log.trace(name);
         new ClientThread(this, name, client);
     }
 
@@ -128,7 +128,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
 
     @Override
     public synchronized void onSocketStart(SocketThread t, Socket s) {
-        log.debug("CLIENT CONNECTED");
+        log.trace("CLIENT CONNECTED");
     }
 
     @Override
