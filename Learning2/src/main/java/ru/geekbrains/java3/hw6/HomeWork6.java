@@ -18,13 +18,13 @@ public class HomeWork6 {
 
     public static void main(String[] args) {
         int[] inArr = {1, 2, 4, 4, 2, 3, 1, 7, 6, 7, 8, 9};
-
-        System.out.println(checkOneFour(inArr));
-        System.out.println(Arrays.toString(getInts(inArr)));
+        HomeWork6 hw = new HomeWork6();
+        System.out.println(hw.checkOneFour(inArr));
+        System.out.println(Arrays.toString(hw.getInts(inArr)));
 
     }
 
-    private static boolean checkOneFour(int[] inArr) {
+    public boolean checkOneFour(int[] inArr) {
         boolean f1 = false;
         boolean f4 = false;
         for (int i : inArr) {
@@ -34,7 +34,7 @@ public class HomeWork6 {
         return f1 && f4;
     }
 
-    private static int[] getInts(int[] inArr) {
+    public int[] getInts(int[] inArr) {
         int count = 0;
         for (int i = inArr.length - 1; i > -1; i--) {
             if (inArr[i] != 4) {
