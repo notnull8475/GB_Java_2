@@ -19,14 +19,19 @@ class HomeWork6Test {
                 () -> assertTrue(hw.checkOneFour(new int[]{1, 4})),
                 () -> assertFalse(hw.checkOneFour(new int[]{1, 1})),
                 () -> assertFalse(hw.checkOneFour(new int[]{4, 4})),
-                () -> assertFalse(hw.checkOneFour(new int[]{2, 2}))
+                () -> assertFalse(hw.checkOneFour(new int[]{1,22,222,444}))
         );
     }
 
     @Test
     void getIntsTest() {
-        int[] inArr = {1, 1, 1, 1, 4, 1, 2, 3};
-        int[] resArr = {1, 2, 3};
-        assertArrayEquals(resArr, hw.getInts(inArr));
+        assertAll(
+                () -> assertArrayEquals(new int[]{1, 2, 3}, hw.getInts(new int[]{1, 1, 1, 1, 4, 1, 2, 3})),
+                () -> assertArrayEquals(new int[]{},hw.getInts(new int[]{4})),
+                () -> assertArrayEquals(new int[]{},hw.getInts(new int[]{0,0,0,0,4})),
+                () -> assertArrayEquals(new int[]{0,0,0,0},hw.getInts(new int[]{4,0,0,0,0})),
+                () -> assertArrayEquals(new int[]{},hw.getInts(new int[]{}))
+
+        );
     }
 }
