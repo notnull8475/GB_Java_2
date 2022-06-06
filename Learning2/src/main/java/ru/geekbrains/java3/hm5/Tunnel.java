@@ -1,5 +1,6 @@
 package ru.geekbrains.java3.hm5;
 
+
 public class Tunnel extends Stage {
     public Tunnel() {
         this.length = 80;
@@ -12,8 +13,10 @@ public class Tunnel extends Stage {
             try {
                 System.out.println(c.getName() + " готовится к этапу(ждет): " +
                         description);
+                c.semaphore.acquire();
                 System.out.println(c.getName() + " начал этап: " + description);
                 Thread.sleep(length / c.getSpeed() * 1000);
+                c.semaphore.release();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } finally {
